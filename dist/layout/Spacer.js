@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import { cn } from "../../lib/utils";
+import { cn } from "../utils";
 const HEIGHT = {
     "1": "h-1", "2": "h-2", "3": "h-3", "4": "h-4", "5": "h-5",
     "6": "h-6", "8": "h-8", "10": "h-10", "12": "h-12", "16": "h-16",

@@ -2,7 +2,7 @@ import { jsx as _jsx } from "react/jsx-runtime";
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
-import { cn } from "../../lib/utils";
+import { cn } from "./utils";
 /* Button — design-system spec (P1)
    ---------------------------------
    Three sizes (sm 28 / md 36 / lg 44) + two icon-only sizes (icon 36 = md,

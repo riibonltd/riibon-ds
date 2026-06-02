@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import { cn } from "../../lib/utils";
+import { cn } from "../utils";
 /** Thin rule, defaults to a horizontal line in the border colour token. */
 export function Divider({ orientation = "horizontal", decorative = true, className }) {
     const isVertical = orientation === "vertical";

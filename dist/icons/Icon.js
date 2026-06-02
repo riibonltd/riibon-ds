@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import { cn } from "../../lib/utils";
+import { cn } from "../utils";
 const SIZE_PX = {
     sm: 16,
     md: 20,

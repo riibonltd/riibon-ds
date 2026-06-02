@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "../../lib/utils";
+import { cn } from "../utils";
 
 type GridCols = "1" | "2" | "3" | "4" | "5" | "6" | "12";
 type GridGap = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "8" | "10";

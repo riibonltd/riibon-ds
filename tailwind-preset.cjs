@@ -247,6 +247,7 @@ module.exports = {
           "text-tertiary":  "var(--rb-text-tertiary)",
           "text-inverse":   "var(--rb-text-inverse)",
           "text-accent":    "var(--rb-text-accent)",
+          "text-placeholder": "var(--rb-text-placeholder)",
           /* Sequential viz ramp */
           "seq-100": "var(--rb-seq-100)",
           "seq-200": "var(--rb-seq-200)",

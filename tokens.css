@@ -195,6 +195,11 @@
     --rb-text-tertiary:  var(--rb-neutral-400);
     --rb-text-inverse:   var(--rb-neutral-0);
     --rb-text-accent:    var(--rb-blue-500);
+    /* Placeholder — its own semantic role, separate from muted-foreground
+       (which doubles as card-description / secondary body text). Sits
+       one tier below text-tertiary so the hint reads as a hint instead
+       of competing with the user's actual entry. */
+    --rb-text-placeholder: var(--rb-neutral-400);
 
     /* Canonical focus ring — blue at 20% opacity, AA on canvas */
     --rb-ring: 0 0 0 3px rgba(24, 31, 217, 0.20);
@@ -467,6 +472,12 @@
     --rb-text-tertiary:  var(--rb-neutral-400);
     --rb-text-inverse:   var(--rb-neutral-800);
     --rb-text-accent:    var(--rb-blue-300);
+    /* Placeholder dark — push one step darker than light mode's neutral-400
+       so the hint reads as a hint against the dark canvas instead of
+       competing with the user's entry (neutral-200, the shadcn
+       muted-foreground default, sat at 80% lightness and looked like
+       real text — that's what this token fixes). */
+    --rb-text-placeholder: var(--rb-neutral-500);
 
     /* Focus ring dark — brighter blue, slightly heavier */
     --rb-ring: 0 0 0 3px rgba(123, 130, 240, 0.32);
