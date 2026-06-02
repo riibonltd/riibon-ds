@@ -1,0 +1,923 @@
+/* react-grid-layout */
+
+/* Riibon brand fonts are preloaded via <link> in index.html */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Drag-and-drop visual feedback */
+.react-grid-item.react-grid-placeholder {
+  background: hsl(var(--primary) / 0.15);
+  border: 2px dashed hsl(var(--primary) / 0.4);
+  border-radius: 0.5rem;
+  opacity: 1;
+}
+.react-grid-item.react-draggable-dragging {
+  z-index: 50;
+  box-shadow: var(--rb-shadow-lg);
+  opacity: 0.9;
+}
+.react-grid-item > .react-resizable-handle::after {
+  border-color: hsl(var(--muted-foreground) / 0.4);
+}
+.react-grid-item > .react-resizable-handle {
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.react-grid-item:hover > .react-resizable-handle {
+  opacity: 1;
+}
+
+/* Touch devices: always show widget action buttons (no hover) */
+@media (hover: none) {
+  .widget-actions {
+    opacity: 1 !important;
+  }
+  .react-grid-item > .react-resizable-handle {
+    opacity: 0.6;
+  }
+}
+
+@layer base {
+  :root {
+    /* ─── Riibon font stacks ─────────────────────────── */
+    --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      "Liberation Mono", "Courier New", monospace;
+    --font-serif: 'Instrument Serif', ui-serif, Georgia, serif;
+
+    /* ─── Riibon brand palette (hex, for direct reference) ─── */
+    --rb-blue: #181FD9;
+    --rb-coral: #CB6E60;
+    --rb-yellow: #F6DD53;
+    --rb-cream: #F4F9F1;
+    --rb-ink: #20241C;
+
+    /* Neutral spine — ink-tinted */
+    --rb-neutral-0:   #FFFFFF;
+    --rb-neutral-25:  #FBFCF9;
+    --rb-neutral-50:  #F4F5F0;
+    --rb-neutral-100: #E9ECE3;
+    --rb-neutral-200: #D0D5C5;
+    --rb-neutral-300: #B3BAA5;
+    --rb-neutral-400: #8B9281;
+    --rb-neutral-500: #6C7563;
+    --rb-neutral-600: #4F5649;
+    --rb-neutral-700: #363A31;
+    --rb-neutral-800: #20241C;
+    --rb-neutral-900: #14160F;
+    --rb-neutral-950: #0A0B07;
+
+    /* Blue scale */
+    --rb-blue-50:  #EEEFFF;
+    --rb-blue-100: #D9DBFF;
+    --rb-blue-200: #A8ACFA;
+    --rb-blue-300: #7B82F0;
+    --rb-blue-400: #4F58E6;
+    --rb-blue-500: #181FD9;
+    --rb-blue-600: #1218A8;
+    --rb-blue-700: #0E127F;
+    --rb-blue-800: #0B0E66;
+    --rb-blue-900: #060840;
+
+    /* Coral scale */
+    --rb-coral-50:  #FBEFEC;
+    --rb-coral-100: #F6DBD5;
+    --rb-coral-200: #ECB8AE;
+    --rb-coral-300: #DE9283;
+    --rb-coral-400: #CB6E60;
+    --rb-coral-500: #B2574A;
+    --rb-coral-600: #9E4B3E;
+    --rb-coral-700: #7B362C;
+    --rb-coral-800: #561E16;
+
+    /* Yellow scale */
+    --rb-yellow-50:  #FEFBE6;
+    --rb-yellow-100: #FCF4BE;
+    --rb-yellow-200: #FBEC8B;
+    --rb-yellow-300: #F6DD53;
+    --rb-yellow-400: #D9BE35;
+    --rb-yellow-500: #AE971F;
+    --rb-yellow-600: #806F13;
+
+    /* Cream scale */
+    --rb-cream-50:  #FBFDF9;
+    --rb-cream-100: #F4F9F1;
+    --rb-cream-200: #E8F0E2;
+    --rb-cream-300: #D1DCC7;
+
+    /* Supporting hues — semantic + data viz */
+    --rb-forest-50:  #ECF4EA;
+    --rb-forest-100: #C9DFC3;
+    --rb-forest-300: #6FA464;
+    --rb-forest-500: #2F7A3F;
+    --rb-forest-700: #1E4E28;
+
+    --rb-terracotta-50:  #FBEAE6;
+    --rb-terracotta-300: #E28875;
+    --rb-terracotta-500: #C0432A;
+    --rb-terracotta-700: #872A17;
+
+    --rb-sage-100: #DDE8D3;
+    --rb-sage-300: #A7BC91;
+    --rb-sage-500: #6F8656;
+
+    --rb-plum-100: #E8D9E6;
+    --rb-plum-300: #A877A4;
+    --rb-plum-500: #6E3E6A;
+
+    --rb-ochre-100: #F3E2B7;
+    --rb-ochre-300: #D9AE56;
+    --rb-ochre-500: #9E7A20;
+
+    /* ─── HSL triplets — enable Tailwind opacity modifiers on rb-* classes ─── */
+    --rb-blue-500-hsl: 238 80% 47%;
+    --rb-blue-300-hsl: 236 80% 71%;
+    --rb-coral-400-hsl: 8 51% 59%;
+    --rb-coral-500-hsl: 8 41% 49%;
+    --rb-coral-600-hsl: 8 43% 43%;
+    --rb-yellow-300-hsl: 51 90% 65%;
+    --rb-yellow-500-hsl: 48 69% 40%;
+    --rb-yellow-600-hsl: 48 73% 29%;
+    --rb-forest-500-hsl: 133 44% 33%;
+    --rb-forest-700-hsl: 133 45% 21%;
+    --rb-terracotta-500-hsl: 10 64% 46%;
+    --rb-terracotta-700-hsl: 10 72% 31%;
+    --rb-plum-500-hsl: 304 28% 34%;
+    --rb-plum-300-hsl: 303 24% 57%;
+    --rb-neutral-500-hsl: 90 8% 42%;
+    --rb-neutral-400-hsl: 85 7% 54%;
+
+    /* Semantic tokens */
+    --rb-success:        var(--rb-forest-500);
+    --rb-success-bg:     var(--rb-forest-50);
+    --rb-success-border: var(--rb-forest-100);
+    --rb-success-strong: var(--rb-forest-700);
+
+    --rb-warning:        var(--rb-coral-400);
+    --rb-warning-bg:     var(--rb-coral-50);
+    --rb-warning-border: var(--rb-coral-100);
+    --rb-warning-strong: var(--rb-coral-600);
+
+    --rb-error:          var(--rb-terracotta-500);
+    --rb-error-bg:       var(--rb-terracotta-50);
+    --rb-error-border:   #EFC9C0;
+    --rb-error-strong:   var(--rb-terracotta-700);
+
+    --rb-info:           var(--rb-blue-500);
+    --rb-info-bg:        var(--rb-blue-50);
+    --rb-info-border:    var(--rb-blue-100);
+    --rb-info-strong:    var(--rb-blue-700);
+
+    --rb-highlight:      var(--rb-yellow-300);
+    --rb-highlight-bg:   var(--rb-yellow-50);
+    --rb-highlight-border: var(--rb-yellow-100);
+
+    /* Surface tiers */
+    --rb-surface-page:     var(--rb-neutral-25);
+    --rb-surface-section:  var(--rb-cream-100);
+    --rb-surface-card:     var(--rb-neutral-0);
+    --rb-surface-elevated: var(--rb-neutral-0);
+    --rb-surface-inline:   var(--rb-neutral-50);
+    --rb-surface-ink:      var(--rb-neutral-800);
+
+    /* Borders — 3 levels, drawn from neutral spine */
+    --rb-border-subtle:  var(--rb-neutral-100);
+    --rb-border:         var(--rb-neutral-200);
+    --rb-border-strong:  var(--rb-neutral-300);
+
+    /* Text — 5 levels, drawn from neutral spine + brand */
+    --rb-text-primary:   var(--rb-neutral-800);
+    --rb-text-secondary: var(--rb-neutral-500);
+    --rb-text-tertiary:  var(--rb-neutral-400);
+    --rb-text-inverse:   var(--rb-neutral-0);
+    --rb-text-accent:    var(--rb-blue-500);
+
+    /* Canonical focus ring — blue at 20% opacity, AA on canvas */
+    --rb-ring: 0 0 0 3px rgba(24, 31, 217, 0.20);
+
+    /* Elevation — ink-tinted, not pure black */
+    --rb-shadow-xs: 0 1px 0 rgba(32, 36, 28, 0.04);
+    --rb-shadow-sm: 0 1px 2px rgba(32, 36, 28, 0.06), 0 0 0 1px rgba(32, 36, 28, 0.04);
+    --rb-shadow-md: 0 4px 12px rgba(32, 36, 28, 0.08), 0 1px 3px rgba(32, 36, 28, 0.04);
+    --rb-shadow-lg: 0 12px 32px rgba(32, 36, 28, 0.12), 0 2px 6px rgba(32, 36, 28, 0.06);
+    --rb-shadow-xl: 0 24px 64px rgba(32, 36, 28, 0.18), 0 4px 12px rgba(32, 36, 28, 0.08);
+
+    /* Data viz — categorical (Meta vs Google vs TikTok…) */
+    --rb-viz-1: var(--rb-blue-500);
+    --rb-viz-2: var(--rb-forest-500);
+    --rb-viz-3: var(--rb-coral-400);
+    --rb-viz-4: var(--rb-yellow-300);
+    --rb-viz-5: var(--rb-plum-500);
+    --rb-viz-6: var(--rb-sage-500);
+    --rb-viz-7: var(--rb-ochre-300);
+    --rb-viz-8: var(--rb-blue-300);
+
+    /* Data viz — sequential (single-hue blue ramp; heatmaps, magnitude) */
+    --rb-seq-100: var(--rb-blue-50);
+    --rb-seq-200: var(--rb-blue-100);
+    --rb-seq-300: var(--rb-blue-200);
+    --rb-seq-400: var(--rb-blue-300);
+    --rb-seq-500: var(--rb-blue-500);
+    --rb-seq-600: var(--rb-blue-700);
+    --rb-seq-700: var(--rb-blue-900);
+
+    /* Data viz — diverging (coral ↔ blue, neutral centre; deltas vs last period) */
+    --rb-div-neg-3: var(--rb-terracotta-500);
+    --rb-div-neg-2: var(--rb-coral-400);
+    --rb-div-neg-1: var(--rb-coral-100);
+    --rb-div-0:     var(--rb-neutral-100);
+    --rb-div-pos-1: var(--rb-blue-100);
+    --rb-div-pos-2: var(--rb-blue-300);
+    --rb-div-pos-3: var(--rb-blue-500);
+
+    /* ─── shadcn HSL tokens, mapped to Riibon palette ─── */
+    /* Page + card: neutral-25 canvas, pure white cards (surface tiers) */
+    --background: 80 33% 98%;      /* rb-neutral-25 */
+    --foreground: 90 13% 13%;      /* rb-neutral-800 / ink */
+
+    --card: 0 0% 100%;             /* rb-neutral-0 */
+    --card-foreground: 90 13% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 90 13% 13%;
+
+    /* Brand blue = primary */
+    --primary: 238 80% 47%;        /* rb-blue-500 */
+    --primary-foreground: 0 0% 100%;
+
+    /* Muted + secondary = neutral-50 (warm off-white) with muted text = neutral-500 */
+    --secondary: 72 20% 95%;       /* rb-neutral-50 */
+    --secondary-foreground: 90 13% 13%;
+    --muted: 72 20% 95%;
+    --muted-foreground: 90 8% 42%; /* rb-neutral-500 */
+
+    --accent: 80 19% 91%;          /* rb-neutral-100 */
+    --accent-foreground: 90 13% 13%;
+
+    --tertiary-foreground: 85 7% 54%; /* rb-neutral-400 */
+    --icon: 90 8% 42%;                /* rb-neutral-500 */
+    --icon-muted: 85 7% 54%;          /* rb-neutral-400 */
+
+    /* Destructive = terracotta-500 (semantic error), not generic red */
+    --destructive: 10 64% 46%;     /* rb-terracotta-500 */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 80 19% 91%;          /* rb-neutral-100 */
+    --input: 79 16% 80%;           /* rb-neutral-200 */
+    --ring: 238 80% 47%;           /* rb-blue-500 */
+
+    --radius: 0.5rem;              /* shadcn default — aligned to rb-radius-md (8px) */
+
+    /* Riibon radius scale — 7 steps, modular. Aligned to design-system spec. */
+    --rb-radius-xs:   4px;
+    --rb-radius-sm:   6px;
+    --rb-radius-md:   8px;
+    --rb-radius-lg:   12px;
+    --rb-radius-xl:   16px;
+    --rb-radius-2xl:  20px;
+    --rb-radius-pill: 999px;
+    --rb-radius:      var(--rb-radius-md);
+
+    /* Riibon spacing scale — non-linear, built around 4px. Don't invent
+       between steps. Use as `var(--rb-space-N)` in CSS or via Tailwind
+       arbitrary values when a token-aligned gap is required. */
+    --rb-space-0:  0;
+    --rb-space-1:  2px;
+    --rb-space-2:  4px;
+    --rb-space-3:  8px;
+    --rb-space-4:  12px;
+    --rb-space-5:  16px;
+    --rb-space-6:  20px;
+    --rb-space-7:  24px;
+    --rb-space-8:  32px;
+    --rb-space-9:  40px;
+    --rb-space-10: 48px;
+    --rb-space-12: 64px;
+    --rb-space-16: 96px;
+
+    /* v1 font aliases — keeps v1 prototype source (riibon-app.jsx, riibon-chat.jsx,
+       etc.) compatible without renaming. Map back to the canonical Shadcn vars. */
+    --rb-font-ui:      var(--font-sans);
+    --rb-font-display: var(--font-display);
+    --rb-font-mono:    var(--font-mono);
+    --rb-font-serif:   var(--font-serif);
+
+    /* v1 ink scale — alias to neutral, since v1 uses ink-N parallel to neutral-N
+       (same hex values, same role). Avoids surprises when copying v1 components. */
+    --rb-ink-50:  var(--rb-neutral-50);
+    --rb-ink-100: var(--rb-neutral-100);
+    --rb-ink-200: var(--rb-neutral-200);
+    --rb-ink-300: var(--rb-neutral-300);
+    --rb-ink-400: var(--rb-neutral-400);
+    --rb-ink-500: var(--rb-neutral-500);
+    --rb-ink-600: var(--rb-neutral-600);
+    --rb-ink-700: var(--rb-neutral-700);
+    --rb-ink-800: var(--rb-neutral-800);
+    --rb-ink-900: var(--rb-neutral-900);
+
+    /* Riibon motion — durations + easing palette. Canonical ease aligned
+       to design-system spec: cubic-bezier(.2,.8,.2,1). */
+    --rb-dur-fast:     120ms;  /* hover, focus, micro-feedback */
+    --rb-dur-base:     200ms;  /* default — most transitions */
+    --rb-dur-slow:     400ms;  /* layout shifts, reveals (per spec) */
+    --rb-dur-slower:   500ms;  /* stagger / dramatic */
+
+    --rb-ease:          cubic-bezier(.2, .8, .2, 1);   /* canonical / standard */
+    --rb-ease-in:       cubic-bezier(.4, 0, .9, .2);   /* exits — accelerate */
+    --rb-ease-out:      cubic-bezier(.16, 1, .3, 1);   /* confidence reveals (per spec) */
+    --rb-ease-in-out:   cubic-bezier(.4, 0, .2, 1);    /* in-place state changes */
+
+    /* ─── Riibon raw type scale — 1.25 modular scale, base 16px ───
+       Lifted directly from the design-system spec. Use these as primitives
+       under semantic .rb-* classes; do not reach for raw scale steps in
+       product code unless building a new token. */
+    --rb-text-2xs:  10.24px;
+    --rb-text-xs:   11.2px;
+    --rb-text-sm:   12.8px;
+    --rb-text-base: 14px;
+    --rb-text-md:   16px;
+    --rb-text-lg:   18px;
+    --rb-text-xl:   20px;
+    --rb-text-2xl:  24px;
+    --rb-text-3xl:  30px;
+    --rb-text-4xl:  38px;
+    --rb-text-5xl:  48px;
+    --rb-text-6xl:  60px;
+    --rb-text-7xl:  76px;
+
+    /* Line heights, tracking, weights — feed semantic .rb-* classes */
+    --rb-leading-flat:    1;
+    --rb-leading-display: 1.05;
+    --rb-leading-tight:   1.25;
+    --rb-leading-snug:    1.35;
+    --rb-leading-normal:  1.55;
+    --rb-leading-loose:   1.7;
+
+    --rb-track-display: -0.025em;
+    --rb-track-tight:   -0.01em;
+    --rb-track-normal:  0;
+    --rb-track-mono:    0.02em;
+    --rb-track-caps:    0.08em;
+
+    --rb-weight-regular:  400;
+    --rb-weight-medium:   500;
+    --rb-weight-semibold: 600;
+    --rb-weight-bold:     700;
+
+    /* ─── Tailwind text-rb-* utility aliases — point at semantic steps in
+       the new scale. The Tailwind utilities (text-rb-h1, text-rb-body, etc.)
+       are now backed by the canonical raw scale. */
+    --rb-text-display:    var(--rb-text-7xl);  --rb-text-display-lh:  calc(var(--rb-text-7xl) * 1.05);  /* 76px */
+    --rb-text-h1:         var(--rb-text-4xl);  --rb-text-h1-lh:       calc(var(--rb-text-4xl) * 1.25);  /* 38px */
+    --rb-text-h2:         var(--rb-text-3xl);  --rb-text-h2-lh:       calc(var(--rb-text-3xl) * 1.25);  /* 30px */
+    --rb-text-h3:         var(--rb-text-2xl);  --rb-text-h3-lh:       calc(var(--rb-text-2xl) * 1.35);  /* 24px */
+    --rb-text-body-lg:    var(--rb-text-md);   --rb-text-body-lg-lh:  calc(var(--rb-text-md)  * 1.55);  /* 16px */
+    --rb-text-body:       var(--rb-text-base); --rb-text-body-lh:     calc(var(--rb-text-base) * 1.55); /* 14px */
+    --rb-text-body-sm:    var(--rb-text-sm);   --rb-text-body-sm-lh:  calc(var(--rb-text-sm) * 1.55);   /* 12.8 */
+    --rb-text-caption:    var(--rb-text-xs);   --rb-text-caption-lh:  calc(var(--rb-text-xs) * 1.35);   /* 11.2 */
+    --rb-text-code:       var(--rb-text-sm);   --rb-text-code-lh:     calc(var(--rb-text-sm) * 1.55);   /* 12.8 */
+
+    --sidebar-background: 72 20% 95%; /* rb-neutral-50 */
+    --sidebar-foreground: 90 13% 13%;
+    --sidebar-primary: 238 80% 47%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 80 19% 91%;
+    --sidebar-accent-foreground: 90 13% 13%;
+    --sidebar-border: 80 19% 91%;
+    --sidebar-ring: 238 80% 47%;
+
+    --chat-user-bg: 72 20% 95%;    /* rb-neutral-50 */
+    --chat-assistant-bg: 0 0% 100%; /* rb-neutral-0 */
+    --chat-input-bg: 72 20% 95%;
+    --chat-hover: 80 19% 91%;      /* rb-neutral-100 */
+  }
+
+  .dark {
+    /* Dark = "Terminal Dark" (v1 riibon-themes.jsx → terminalDark): neutral-950
+       canvas, blue-300 accent, yellow reserved for highlight only. The v1
+       "Midnight Ops" theme uses a yellow accent instead — see
+       docs/design-system/dark-theme-parity.md if/when we want to swap. */
+    --background: 75 22% 4%;       /* rb-neutral-950 */
+    /* Foreground uses cream-100, NOT pure white — matches v1 spec
+       (text: '#F4F9F1' in terminalDark). Pure white on near-black is harsh
+       (eye strain, OLED vibration); cream-100 is calmer, warmer, better-read. */
+    --foreground: 102 38% 96%;
+
+    --card: 77 19% 7%;             /* rb-neutral-900 */
+    --card-foreground: 0 0% 100%;
+    --popover: 77 19% 7%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 236 80% 71%;        /* rb-blue-300 */
+    --primary-foreground: 75 22% 4%;
+
+    --secondary: 90 13% 13%;       /* rb-neutral-800 */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 90 13% 13%;
+    --muted-foreground: 79 16% 80%; /* rb-neutral-200 */
+
+    --accent: 87 8% 21%;           /* rb-neutral-700 */
+    --accent-foreground: 0 0% 100%;
+
+    --tertiary-foreground: 85 7% 54%;
+    --icon: 79 16% 80%;
+    --icon-muted: 85 7% 54%;
+
+    --destructive: 10 64% 46%;     /* rb-terracotta-500 */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 87 8% 21%;           /* rb-neutral-700 */
+    --input: 87 8% 21%;
+    --ring: 236 80% 71%;
+
+    --sidebar-background: 77 19% 7%; /* rb-neutral-900 */
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 236 80% 71%;
+    --sidebar-primary-foreground: 75 22% 4%;
+    --sidebar-accent: 87 8% 21%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 87 8% 21%;
+    --sidebar-ring: 236 80% 71%;
+
+    --chat-user-bg: 90 13% 13%;    /* rb-neutral-800 */
+    --chat-assistant-bg: 77 19% 7%; /* rb-neutral-900 */
+    --chat-input-bg: 90 13% 13%;
+    --chat-hover: 87 8% 21%;       /* rb-neutral-700 */
+
+    /* Riibon semantic tokens — flip for dark mode */
+    --rb-surface-page:     var(--rb-neutral-950);
+    --rb-surface-section:  var(--rb-neutral-900);
+    --rb-surface-card:     var(--rb-neutral-900);
+    --rb-surface-elevated: var(--rb-neutral-800);
+    --rb-surface-inline:   var(--rb-neutral-800);
+    --rb-surface-ink:      var(--rb-neutral-950);
+
+    /* Borders dark — drop a level into neutral-700/800 */
+    --rb-border-subtle:  var(--rb-neutral-800);
+    --rb-border:         var(--rb-neutral-700);
+    --rb-border-strong:  var(--rb-neutral-600);
+
+    /* Text dark — flip primary to near-white, keep tertiary muted */
+    --rb-text-primary:   var(--rb-cream-100);
+    --rb-text-secondary: var(--rb-neutral-300);
+    --rb-text-tertiary:  var(--rb-neutral-400);
+    --rb-text-inverse:   var(--rb-neutral-800);
+    --rb-text-accent:    var(--rb-blue-300);
+
+    /* Focus ring dark — brighter blue, slightly heavier */
+    --rb-ring: 0 0 0 3px rgba(123, 130, 240, 0.32);
+
+    /* Sequential ramp dark — invert direction so 100 = darkest, 700 = brightest */
+    --rb-seq-100: var(--rb-blue-900);
+    --rb-seq-200: var(--rb-blue-800);
+    --rb-seq-300: var(--rb-blue-700);
+    --rb-seq-400: var(--rb-blue-500);
+    --rb-seq-500: var(--rb-blue-400);
+    --rb-seq-600: var(--rb-blue-300);
+    --rb-seq-700: var(--rb-blue-200);
+
+    /* Diverging ramp dark — softer mid, brighter ends for contrast */
+    --rb-div-neg-3: var(--rb-terracotta-300);
+    --rb-div-neg-2: var(--rb-coral-300);
+    --rb-div-neg-1: var(--rb-coral-700);
+    --rb-div-0:     var(--rb-neutral-700);
+    --rb-div-pos-1: var(--rb-blue-800);
+    --rb-div-pos-2: var(--rb-blue-300);
+    --rb-div-pos-3: var(--rb-blue-200);
+
+    --rb-success:        var(--rb-forest-300);
+    --rb-success-bg:     rgba(47, 122, 63, 0.14);
+    --rb-success-border: var(--rb-forest-700);
+    --rb-success-strong: var(--rb-forest-100);
+
+    --rb-warning:        var(--rb-coral-300);
+    --rb-warning-bg:     rgba(203, 110, 96, 0.14);
+    --rb-warning-border: var(--rb-coral-700);
+    --rb-warning-strong: var(--rb-coral-100);
+
+    --rb-error:          var(--rb-terracotta-300);
+    --rb-error-bg:       rgba(192, 67, 42, 0.18);
+    --rb-error-border:   var(--rb-terracotta-700);
+    --rb-error-strong:   #FBEAE6;
+
+    --rb-info:           var(--rb-blue-300);
+    --rb-info-bg:        rgba(24, 31, 217, 0.20);
+    --rb-info-border:    var(--rb-blue-700);
+    --rb-info-strong:    var(--rb-blue-100);
+
+    --rb-highlight:      var(--rb-yellow-300);
+    --rb-highlight-bg:   rgba(246, 221, 83, 0.14);
+    --rb-highlight-border: var(--rb-yellow-600);
+
+    /* Shadows — deeper, more ink for dark canvases */
+    --rb-shadow-xs: 0 1px 0 rgba(0, 0, 0, 0.40);
+    --rb-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.40), 0 0 0 1px rgba(0, 0, 0, 0.30);
+    --rb-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.48), 0 1px 3px rgba(0, 0, 0, 0.36);
+    --rb-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.60), 0 2px 6px rgba(0, 0, 0, 0.40);
+    --rb-shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.70), 0 4px 12px rgba(0, 0, 0, 0.48);
+
+    /* Primary data-viz tokens can shift lighter for contrast on dark */
+    --rb-viz-1: var(--rb-blue-300);
+    --rb-viz-5: var(--rb-plum-300);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    /* Geist stylistic sets — ss01 = straight-sided alternates (cleaner g, t),
+       cv11 = open-aperture single-storey a. Matches v1 .rb-root exactly. */
+    font-feature-settings: "ss01", "cv11";
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Riibon typography defaults — applied globally so headings + code adopt
+     the brand families without per-element pairing. Override with
+     `font-sans` if a specific heading should stay neutral. */
+  h1, h2 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  code, kbd, samp, pre {
+    font-family: var(--font-mono);
+  }
+
+  .chat-prose p,
+  .chat-prose li {
+    @apply text-secondary-foreground;
+  }
+  .chat-prose h1,
+  .chat-prose h2,
+  .chat-prose h3 {
+    @apply text-foreground;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* ─── Riibon semantic type classes — canonical, lifted from design-system
+   spec. Apply via className: <h2 className="rb-h2">, <span className="rb-mono">.
+   Each class bakes in family + size + line-height + weight + tracking so the
+   reader doesn't have to compose four utilities. Tailwind text-rb-* utilities
+   remain available for finer-grained pairing. */
+.rb-display-1 { font-family: var(--font-display); font-weight: 600; font-size: var(--rb-text-7xl); line-height: var(--rb-leading-display); letter-spacing: var(--rb-track-display); }
+.rb-display-2 { font-family: var(--font-display); font-weight: 600; font-size: var(--rb-text-6xl); line-height: var(--rb-leading-display); letter-spacing: var(--rb-track-display); }
+.rb-display-3 { font-family: var(--font-display); font-weight: 600; font-size: var(--rb-text-5xl); line-height: var(--rb-leading-display); letter-spacing: var(--rb-track-display); }
+
+.rb-h1 { font-family: var(--font-display); font-weight: 600; font-size: var(--rb-text-4xl); line-height: var(--rb-leading-tight); letter-spacing: var(--rb-track-display); }
+.rb-h2 { font-family: var(--font-display); font-weight: 600; font-size: var(--rb-text-3xl); line-height: var(--rb-leading-tight); letter-spacing: var(--rb-track-display); }
+.rb-h3 { font-family: var(--font-display); font-weight: 600; font-size: var(--rb-text-2xl); line-height: var(--rb-leading-snug); letter-spacing: var(--rb-track-tight); }
+.rb-h4 { font-family: var(--font-display); font-weight: 600; font-size: var(--rb-text-xl);  line-height: var(--rb-leading-snug); letter-spacing: var(--rb-track-tight); }
+.rb-h5 { font-family: var(--font-sans);    font-weight: 600; font-size: var(--rb-text-lg);  line-height: var(--rb-leading-snug); }
+.rb-h6 { font-family: var(--font-sans);    font-weight: 600; font-size: var(--rb-text-md);  line-height: var(--rb-leading-snug); }
+
+.rb-body-lg { font-family: var(--font-sans); font-size: var(--rb-text-md);   line-height: var(--rb-leading-normal); }
+.rb-body    { font-family: var(--font-sans); font-size: var(--rb-text-base); line-height: var(--rb-leading-normal); }
+.rb-body-sm { font-family: var(--font-sans); font-size: var(--rb-text-sm);   line-height: var(--rb-leading-normal); }
+
+.rb-caption  { font-family: var(--font-sans); font-size: var(--rb-text-xs);  line-height: var(--rb-leading-snug); color: var(--rb-text-secondary); }
+.rb-overline { font-family: var(--font-mono); font-size: var(--rb-text-2xs); line-height: 1; letter-spacing: var(--rb-track-caps); text-transform: uppercase; color: var(--rb-text-secondary); font-weight: 600; }
+
+.rb-num-display { font-family: var(--font-display); font-weight: 600; font-size: var(--rb-text-4xl); line-height: var(--rb-leading-flat); letter-spacing: var(--rb-track-display); font-variant-numeric: tabular-nums; }
+.rb-num-large   { font-family: var(--font-display); font-weight: 600; font-size: var(--rb-text-3xl); line-height: var(--rb-leading-flat); letter-spacing: var(--rb-track-tight); font-variant-numeric: tabular-nums; }
+.rb-num-medium  { font-family: var(--font-display); font-weight: 600; font-size: var(--rb-text-xl);  line-height: var(--rb-leading-flat); font-variant-numeric: tabular-nums; }
+
+.rb-code { font-family: var(--font-mono); font-size: 12.5px; background: var(--rb-neutral-50); border: 1px solid var(--rb-border-subtle); padding: 1px 6px; border-radius: 4px; color: var(--rb-text-primary); }
+.rb-kbd  { font-family: var(--font-mono); font-size: 10.5px; background: var(--rb-neutral-50); border: 1px solid var(--rb-border); border-bottom-width: 2px; padding: 1px 6px; border-radius: 4px; color: var(--rb-text-secondary); font-weight: 500; }
+
+/* Riibon utility classes — ported from v1 tokens.css */
+.rb-mono {
+  font-family: var(--font-mono);
+  font-feature-settings: "ss02", "cv06";
+  letter-spacing: var(--rb-track-mono);
+}
+.rb-display {
+  font-family: var(--font-display);
+  letter-spacing: var(--rb-track-display);
+}
+.rb-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(32, 36, 28, 0.2) transparent;
+}
+.rb-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+.rb-scroll::-webkit-scrollbar-thumb {
+  background: rgba(32, 36, 28, 0.18);
+  border-radius: 4px;
+}
+.rb-scroll::-webkit-scrollbar-track { background: transparent; }
+
+/* Riibon keyframes — duplicated raw here so .rb-pulse / .rb-caret work
+   without depending on Tailwind JIT emitting `animate-rb-*` utilities. */
+@keyframes rb-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+@keyframes rb-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes rb-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+@keyframes rb-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Animated dots container — `<span class="rb-pulse"><span/><span/><span/></span>` */
+.rb-pulse > span {
+  animation: rb-pulse 1.4s var(--rb-ease) infinite;
+}
+.rb-pulse > span:nth-child(2) { animation-delay: 0.2s; }
+.rb-pulse > span:nth-child(3) { animation-delay: 0.4s; }
+
+.rb-caret {
+  display: inline-block;
+  width: 0.55ch;
+  background: currentColor;
+  animation: rb-blink 1s steps(1) infinite;
+}
+
+/* Respect prefers-reduced-motion globally.
+   - Looping/auto-playing animations are stripped to a single frame.
+   - Transitions remain (they're user-action-initiated and brief) but are
+     compressed to a flash so people who set this don't watch every hover
+     fade for 200ms. */
+@media (prefers-reduced-motion: reduce) {
+  .rb-pulse > span,
+  .rb-caret,
+  .animate-rb-pulse,
+  .animate-rb-blink,
+  .animate-rb-scan,
+  .animate-rb-marquee {
+    animation: none !important;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Markdown prose styling for chat
+   ─────────────────────────────────────────────────────────────
+   Every assistant message renders inside `.chat-prose`. The block
+   now leans on the Riibon type scale (text-rb-*) instead of raw
+   pixels — so any future scale tweak ripples through chat
+   automatically, and chat headings are consistent with the rest
+   of the app. We bump the in-message heading sizes one step up
+   from the previous values (which were so close to body that
+   they didn't read as headings):
+     • <h1> in chat → text-rb-h3 (20/28, 600)
+     • <h2> in chat → text-rb-body-lg + bold (17/26, 600)
+     • <h3> in chat → text-rb-body + bold  (15/24, 600)
+   Body, code, and tables use rb-body / rb-code / rb-body-sm /
+   rb-caption respectively. Headings auto-pick Bricolage Grotesque
+   from the base layer; code auto-picks JetBrains Mono. */
+.chat-prose {
+  @apply text-rb-body;
+}
+
+.chat-prose h1,
+.chat-prose h2,
+.chat-prose h3 {
+  @apply text-foreground mt-4 mb-2;
+}
+.chat-prose h1 { @apply text-rb-h3; }
+.chat-prose h2 { @apply text-rb-body-lg font-semibold; }
+.chat-prose h3 { @apply text-rb-body font-semibold; }
+
+.chat-prose p { @apply mb-3; }
+.chat-prose ul, .chat-prose ol { @apply mb-3 pl-6; }
+.chat-prose ul { @apply list-disc; }
+.chat-prose ol { @apply list-decimal; }
+.chat-prose li { @apply mb-1; }
+
+.chat-prose code {
+  @apply bg-secondary text-foreground px-1.5 py-0.5 rounded text-rb-code;
+}
+.chat-prose pre {
+  @apply bg-secondary rounded-lg p-4 mb-3 overflow-x-auto;
+}
+.chat-prose pre code {
+  @apply bg-transparent p-0 text-rb-code;
+}
+
+.chat-prose blockquote {
+  @apply border-l-2 border-muted-foreground/30 pl-4 italic text-muted-foreground mb-3;
+}
+
+.chat-prose a {
+  @apply text-primary underline;
+}
+.chat-prose a:hover {
+  @apply opacity-90;
+}
+
+.chat-prose table {
+  @apply w-full border-collapse mb-3;
+}
+.chat-prose th, .chat-prose td {
+  @apply border border-border px-3 py-2 text-rb-body-sm;
+}
+.chat-prose th {
+  @apply bg-secondary text-rb-caption font-semibold text-muted-foreground uppercase;
+}
+
+/* Collapsible sections via <details>/<summary> */
+.chat-prose details {
+  @apply border-l-2 border-border pl-3 my-2;
+}
+.chat-prose summary {
+  @apply cursor-pointer font-semibold text-foreground select-none;
+  font-size: 15px;
+  line-height: 24px;
+}
+.chat-prose summary:hover {
+  @apply text-primary;
+}
+.chat-prose details[open] summary {
+  @apply mb-2;
+}
+
+/* TipTap Report Editor — drag handles and block styling (P7-08/P7-13) */
+.ProseMirror {
+  position: relative;
+}
+
+.ProseMirror > * {
+  position: relative;
+}
+
+/* Heading typography — Tailwind Preflight resets all headings, so we
+   restore Notion-like sizing.  Placeholders inherit these automatically. */
+.ProseMirror h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+.ProseMirror h1:first-child {
+  margin-top: 0;
+}
+.ProseMirror h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 1.5rem;
+  margin-bottom: 0.375rem;
+}
+.ProseMirror h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.5;
+  margin-top: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+.ProseMirror p {
+  margin-bottom: 0.75rem;
+}
+
+/* Drag handle shown on left side of each block */
+.drag-handle {
+  position: absolute;
+  left: -28px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  color: hsl(var(--muted-foreground));
+  opacity: 0;
+  transition: opacity 0.15s;
+  border-radius: 4px;
+  z-index: 10;
+}
+
+.drag-handle:hover {
+  opacity: 1;
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Show drag handle when hovering over any top-level block */
+.ProseMirror > *:hover > .drag-handle,
+.ProseMirror > .drag-handle + *:hover ~ .drag-handle,
+.ProseMirror:hover .drag-handle {
+  opacity: 0.4;
+}
+
+.ProseMirror > *:hover + .drag-handle,
+.ProseMirror .drag-handle:hover {
+  opacity: 1;
+}
+
+/* Drop cursor indicator */
+.ProseMirror-dropcursor {
+  border-top: 2px solid hsl(var(--primary));
+  display: block;
+  pointer-events: none;
+}
+
+/* Placeholder text — shown on any empty node (heading, paragraph, etc.)
+   Uses inherit so the placeholder always matches the real text styling. */
+.ProseMirror .is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: hsl(var(--muted-foreground) / 0.5);
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  font-family: inherit;
+}
+
+/* Paragraph placeholder: subtle italic hint */
+.ProseMirror p.is-empty::before {
+  font-style: italic;
+}
+
+/* Selected atom node (data blocks) */
+.ProseMirror .ProseMirror-selectednode {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Print-friendly styles for reports (P7-04) */
+@media print {
+  /* Hide app chrome */
+  aside, .print\\:hidden, [data-testid="button-new-chat"] {
+    display: none !important;
+  }
+  /* Full-width report content */
+  main {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+  /* Clean backgrounds */
+  body, .bg-background, .bg-card {
+    background: white !important;
+    color: black !important;
+  }
+  /* Page break inside sections */
+  .bg-card.rounded-lg {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin-bottom: 1.5rem !important;
+  }
+  /* Charts print at reasonable size */
+  .recharts-responsive-container {
+    max-height: 280px !important;
+  }
+  /* Title page gets its own page */
+  #section-title-page {
+    page-break-after: always;
+  }
+}

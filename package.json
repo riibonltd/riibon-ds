@@ -1,0 +1,45 @@
+{
+  "name": "@riibon/ds",
+  "version": "1.0.0",
+  "description": "Riibon design-system primitives + tokens (generated snapshot of riibon-ai/src)",
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./tokens.css": "./tokens.css",
+    "./tailwind-preset": "./tailwind-preset.cjs"
+  },
+  "files": [
+    "dist",
+    "src",
+    "tokens.css",
+    "tailwind-preset.cjs"
+  ],
+  "scripts": {
+    "sync": "node scripts/sync-from-app.mjs",
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.2.3",
+    "@tailwindcss/container-queries": "^0.1.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.462.0",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.8.3"
+  }
+}
