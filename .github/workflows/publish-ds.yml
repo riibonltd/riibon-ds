@@ -1,0 +1,67 @@
+# Auto-publish the Riibon design system.
+#
+# Runs HERE (riibon-ds, a PUBLIC repo) where GitHub Actions are free and
+# unaffected by the riibonltd private-repo Actions billing block. On a
+# schedule it pulls the monorepo's design system, and if it changed, bumps +
+# tags + pushes a new @riibon/ds version. Consumers (riibon-web) then bump
+# their #vX.Y.Z pin to adopt.
+#
+# ONE-TIME SETUP: add a repo secret RIIBON_AI_READ_TOKEN — a fine-grained PAT
+# with Contents: Read on riibonltd/riibon-ai (needed to clone the private
+# monorepo). Until that secret exists, scheduled runs skip cleanly (no
+# failures). Run on demand any time via the "Run workflow" button.
+
+name: Publish design system
+
+on:
+  schedule:
+    - cron: "0 */6 * * *" # every 6 hours
+  workflow_dispatch: {}
+
+permissions:
+  contents: write # so GITHUB_TOKEN can push commits + tags to this repo
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Gate on token presence
+        id: gate
+        env:
+          TOK: ${{ secrets.RIIBON_AI_READ_TOKEN }}
+        run: |
+          if [ -z "$TOK" ]; then
+            echo "RIIBON_AI_READ_TOKEN not set — skipping. Add it to enable auto-publish."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout riibon-ds
+        if: steps.gate.outputs.ok == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Checkout monorepo (riibon-ai, private)
+        if: steps.gate.outputs.ok == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: riibonltd/riibon-ai
+          token: ${{ secrets.RIIBON_AI_READ_TOKEN }}
+          path: _riibon-ai
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.ok == 'true'
+        with:
+          node-version: "22"
+
+      - name: Sync + build + publish if changed
+        if: steps.gate.outputs.ok == 'true'
+        run: |
+          git config user.name "riibon-ds-bot"
+          git config user.email "bot@riibon.com"
+          npm ci
+          npm run release -- ./_riibon-ai

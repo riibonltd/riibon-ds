@@ -64,7 +64,11 @@ console.log(`• version → ${next}`);
 run("git add -A");
 run(`git commit -m "release: v${next} — sync from monorepo design system"`);
 run(`git tag v${next}`);
-run("git push origin HEAD");
+// Push to an explicit branch so this works both locally (on `main`) and in
+// CI (where the checkout may be in detached-HEAD state).
+const branch = run("git rev-parse --abbrev-ref HEAD").trim();
+const target = branch === "HEAD" ? "main" : branch;
+run(`git push origin HEAD:${target}`);
 run(`git push origin v${next}`);
 
 console.log(`\n✓ Published @riibon/ds v${next}`);

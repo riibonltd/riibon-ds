@@ -70,10 +70,16 @@ Then bump the consumer pin (e.g. riibon-web's `package.json`) to the new
 (Under the hood: `npm run sync` mirrors `packages/ui` + refreshes
 `tokens.css`/`tailwind-preset.cjs`; `npm run build` regenerates `dist/`.)
 
-### Fully automatic (when GitHub Actions billing is restored)
+### Fully automatic (already wired up)
 
-`riibonltd` Actions are currently billing-blocked, so CI can't run yet.
-A ready-to-activate workflow lives at [`ci/publish-ds.yml`](ci/publish-ds.yml):
-drop it into `riibon-ai/.github/workflows/`, add a `RIIBON_DS_PUSH_TOKEN`
-secret, and pushes to the monorepo's design-system paths will auto-publish
-here. Until then, `npm run release` is the path.
+[`.github/workflows/publish-ds.yml`](.github/workflows/publish-ds.yml) runs
+**here**, in this PUBLIC repo, where GitHub Actions are free and unaffected by
+the `riibonltd` private-repo Actions billing block. Every 6 hours (and on the
+"Run workflow" button) it pulls the monorepo, and if the design system changed,
+publishes a new tagged version automatically — `npm run release` is then only
+needed when you want an instant publish.
+
+**One-time setup to switch it on:** add a repo secret `RIIBON_AI_READ_TOKEN` —
+a fine-grained PAT with **Contents: Read** on `riibonltd/riibon-ai` (needed to
+clone the private monorepo). Until that secret exists the scheduled run skips
+cleanly (no failures).
