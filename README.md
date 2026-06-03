@@ -55,12 +55,25 @@ import { Button, Stack, Icon, cn } from "@riibon/ds";
 
 ## Cut a release (when the monorepo's design system changes)
 
+One command — syncs from the monorepo, rebuilds, and (only if something
+changed) bumps + commits + tags + pushes:
+
 ```bash
-npm run sync            # mirror ../riibon-ai/packages/ui + tokens + preset
-npm run build           # regenerate dist/
-# bump "version" in package.json, then:
-git commit -am "sync: <what changed>"
-git tag vX.Y.Z && git push --tags && git push
+npm run release                 # patch bump, monorepo at ../riibon-ai
+npm run release -- --minor      # minor bump
+npm run release -- /path/to/riibon-ai --major
 ```
 
-Consumers bump their `#vX.Y.Z` pin to adopt the change.
+Then bump the consumer pin (e.g. riibon-web's `package.json`) to the new
+`#vX.Y.Z`. If nothing changed, `release` no-ops without publishing.
+
+(Under the hood: `npm run sync` mirrors `packages/ui` + refreshes
+`tokens.css`/`tailwind-preset.cjs`; `npm run build` regenerates `dist/`.)
+
+### Fully automatic (when GitHub Actions billing is restored)
+
+`riibonltd` Actions are currently billing-blocked, so CI can't run yet.
+A ready-to-activate workflow lives at [`ci/publish-ds.yml`](ci/publish-ds.yml):
+drop it into `riibon-ai/.github/workflows/`, add a `RIIBON_DS_PUSH_TOKEN`
+secret, and pushes to the monorepo's design-system paths will auto-publish
+here. Until then, `npm run release` is the path.
