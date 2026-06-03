@@ -1,0 +1,8 @@
+name: smoke-test
+on:
+  workflow_dispatch: {}
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "public-repo Actions ran OK — not billing-blocked"
