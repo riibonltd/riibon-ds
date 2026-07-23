@@ -23,7 +23,7 @@
 }
 .react-grid-item > .react-resizable-handle {
   opacity: 0;
-  transition: opacity 0.15s;
+  transition: opacity var(--rb-dur-fast) var(--rb-ease);
 }
 .react-grid-item:hover > .react-resizable-handle {
   opacity: 1;
@@ -54,22 +54,22 @@
     --rb-coral: #CB6E60;
     --rb-yellow: #F6DD53;
     --rb-cream: #F4F9F1;
-    --rb-ink: #20241C;
+    --rb-ink: #1E211B;
 
-    /* Neutral spine — ink-tinted */
+    /* Neutral spine — CHANGED: near-neutral, faint warm cast (was warm/olive) */
     --rb-neutral-0:   #FFFFFF;
-    --rb-neutral-25:  #FBFCF9;
-    --rb-neutral-50:  #F4F5F0;
-    --rb-neutral-100: #E9ECE3;
-    --rb-neutral-200: #D0D5C5;
-    --rb-neutral-300: #B3BAA5;
-    --rb-neutral-400: #8B9281;
-    --rb-neutral-500: #6C7563;
-    --rb-neutral-600: #4F5649;
-    --rb-neutral-700: #363A31;
-    --rb-neutral-800: #20241C;
-    --rb-neutral-900: #14160F;
-    --rb-neutral-950: #0A0B07;
+    --rb-neutral-25:  #FBFBFA;
+    --rb-neutral-50:  #F5F6F3;
+    --rb-neutral-100: #EAECE7;
+    --rb-neutral-200: #D7DAD3;
+    --rb-neutral-300: #B8BCB3;
+    --rb-neutral-400: #8D9188;
+    --rb-neutral-500: #666A62;
+    --rb-neutral-600: #494D45;
+    --rb-neutral-700: #32352F;
+    --rb-neutral-800: #1E211B;
+    --rb-neutral-900: #15170F;
+    --rb-neutral-950: #0D0E09;
 
     /* Blue scale */
     --rb-blue-50:  #EEEFFF;
@@ -148,8 +148,8 @@
     --rb-terracotta-700-hsl: 10 72% 31%;
     --rb-plum-500-hsl: 304 28% 34%;
     --rb-plum-300-hsl: 303 24% 57%;
-    --rb-neutral-500-hsl: 90 8% 42%;
-    --rb-neutral-400-hsl: 85 7% 54%;
+    --rb-neutral-500-hsl: 90 4% 40%;
+    --rb-neutral-400-hsl: 87 4% 55%;
 
     /* Semantic tokens */
     --rb-success:        var(--rb-forest-500);
@@ -172,16 +172,29 @@
     --rb-info-border:    var(--rb-blue-100);
     --rb-info-strong:    var(--rb-blue-700);
 
+    /* Chart data fills — saturated, distinguishable per theme. Distinct from
+       the semantic text tokens above (which fade to pale pastels in dark). */
+    --rb-chart-demand-peak:     #2E7D46;
+    --rb-chart-demand-shoulder: #E0A100;
+    --rb-chart-demand-off:      #C0432A;
+    --rb-chart-demand-none:     #C9CEC0;
+    --rb-chart-eff-1:           #C7D2FE;
+    --rb-chart-eff-2:           #818CF8;
+    --rb-chart-eff-3:           #4F46E5;
+    --rb-chart-eff-4:           #312E81;
+
     --rb-highlight:      var(--rb-yellow-300);
     --rb-highlight-bg:   var(--rb-yellow-50);
     --rb-highlight-border: var(--rb-yellow-100);
 
-    /* Surface tiers */
-    --rb-surface-page:     var(--rb-neutral-25);
-    --rb-surface-section:  var(--rb-cream-100);
+    /* Surface tiers — page/section/inline are literal hexes per handoff
+       (no longer scale steps); do NOT rewrite as var(--rb-neutral-*) —
+       that reintroduces drift (WS1 §1.8 / risk R8). */
+    --rb-surface-page:     #FCFCFC;
+    --rb-surface-section:  #F5F7F3;
     --rb-surface-card:     var(--rb-neutral-0);
     --rb-surface-elevated: var(--rb-neutral-0);
-    --rb-surface-inline:   var(--rb-neutral-50);
+    --rb-surface-inline:   #F2F3F4;
     --rb-surface-ink:      var(--rb-neutral-800);
 
     /* Borders — 3 levels, drawn from neutral spine */
@@ -204,12 +217,20 @@
     /* Canonical focus ring — blue at 20% opacity, AA on canvas */
     --rb-ring: 0 0 0 3px rgba(24, 31, 217, 0.20);
 
-    /* Elevation — ink-tinted, not pure black */
-    --rb-shadow-xs: 0 1px 0 rgba(32, 36, 28, 0.04);
-    --rb-shadow-sm: 0 1px 2px rgba(32, 36, 28, 0.06), 0 0 0 1px rgba(32, 36, 28, 0.04);
-    --rb-shadow-md: 0 4px 12px rgba(32, 36, 28, 0.08), 0 1px 3px rgba(32, 36, 28, 0.04);
-    --rb-shadow-lg: 0 12px 32px rgba(32, 36, 28, 0.12), 0 2px 6px rgba(32, 36, 28, 0.06);
-    --rb-shadow-xl: 0 24px 64px rgba(32, 36, 28, 0.18), 0 4px 12px rgba(32, 36, 28, 0.08);
+    /* Elevation — ink-tinted, not pure black. CHANGED: base rgb + tighter alphas. */
+    --rb-shadow-xs: 0 1px 0 rgba(30, 33, 27, 0.04);
+    --rb-shadow-sm: 0 1px 2px rgba(30, 33, 27, 0.05), 0 0 0 1px rgba(30, 33, 27, 0.03);
+    --rb-shadow-md: 0 4px 12px rgba(30, 33, 27, 0.07), 0 1px 3px rgba(30, 33, 27, 0.04);
+    --rb-shadow-lg: 0 12px 32px rgba(30, 33, 27, 0.11), 0 2px 6px rgba(30, 33, 27, 0.05);
+    --rb-shadow-xl: 0 24px 64px rgba(30, 33, 27, 0.16), 0 4px 12px rgba(30, 33, 27, 0.07);
+
+    /* Offset hard-shadow — marketing-register brand element (Brand
+       Unification D4: keep + codify, not part of the elevation scale
+       above). A flat, non-blurred colour underlay offset behind a card —
+       distinct motif from soft elevation, used on marketing cards/panels
+       for graphic drama. Fixed brand hues, same in light + dark. */
+    --rb-shadow-offset-lg: 18px 18px 0 0 var(--rb-blue-500);
+    --rb-shadow-offset-sm: 8px 8px 0 0 var(--rb-yellow-300);
 
     /* Data viz — categorical (Meta vs Google vs TikTok…) */
     --rb-viz-1: var(--rb-blue-500);
@@ -239,50 +260,57 @@
     --rb-div-pos-2: var(--rb-blue-300);
     --rb-div-pos-3: var(--rb-blue-500);
 
+    /* Chart chrome — Recharts theming (grid/axis/tooltip). NEW per handoff v0.8. */
+    --rb-grid: #EAECE7;
+    --rb-axis: #8D9188;
+    --rb-tooltip-bg: #1E211B;
+    --rb-tooltip-fg: #FFFFFF;
+
     /* ─── shadcn HSL tokens, mapped to Riibon palette ─── */
-    /* Page + card: neutral-25 canvas, pure white cards (surface tiers) */
-    --background: 80 33% 98%;      /* rb-neutral-25 */
-    --foreground: 90 13% 13%;      /* rb-neutral-800 / ink */
+    /* Page + card: surface-page canvas (literal, not a scale step), pure white cards */
+    --background: 0 0% 99%;        /* rb-surface-page #FCFCFC */
+    --foreground: 90 10% 12%;      /* rb-ink #1E211B */
 
     --card: 0 0% 100%;             /* rb-neutral-0 */
-    --card-foreground: 90 13% 13%;
+    --card-foreground: 90 10% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 90 13% 13%;
+    --popover-foreground: 90 10% 12%;
 
     /* Brand blue = primary */
     --primary: 238 80% 47%;        /* rb-blue-500 */
     --primary-foreground: 0 0% 100%;
 
     /* Muted + secondary = neutral-50 (warm off-white) with muted text = neutral-500 */
-    --secondary: 72 20% 95%;       /* rb-neutral-50 */
-    --secondary-foreground: 90 13% 13%;
-    --muted: 72 20% 95%;
-    --muted-foreground: 90 8% 42%; /* rb-neutral-500 */
+    --secondary: 80 14% 96%;       /* rb-neutral-50 #F5F6F3 */
+    --secondary-foreground: 90 10% 12%;
+    --muted: 80 14% 96%;
+    --muted-foreground: 90 4% 40%; /* rb-neutral-500 #666A62 */
 
-    --accent: 80 19% 91%;          /* rb-neutral-100 */
-    --accent-foreground: 90 13% 13%;
+    --accent: 84 12% 92%;          /* rb-neutral-100 #EAECE7 */
+    --accent-foreground: 90 10% 12%;
 
-    --tertiary-foreground: 85 7% 54%; /* rb-neutral-400 */
-    --icon: 90 8% 42%;                /* rb-neutral-500 */
-    --icon-muted: 85 7% 54%;          /* rb-neutral-400 */
+    --tertiary-foreground: 87 4% 55%; /* rb-neutral-400 #8D9188 */
+    --icon: 90 4% 40%;                /* rb-neutral-500 #666A62 */
+    --icon-muted: 87 4% 55%;          /* rb-neutral-400 #8D9188 */
 
     /* Destructive = terracotta-500 (semantic error), not generic red */
     --destructive: 10 64% 46%;     /* rb-terracotta-500 */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 80 19% 91%;          /* rb-neutral-100 */
-    --input: 79 16% 80%;           /* rb-neutral-200 */
+    --border: 84 12% 92%;          /* rb-neutral-100 #EAECE7 */
+    --input: 86 9% 84%;            /* rb-neutral-200 #D7DAD3 */
     --ring: 238 80% 47%;           /* rb-blue-500 */
 
-    --radius: 0.5rem;              /* shadcn default — aligned to rb-radius-md (8px) */
+    --radius: 0.375rem;            /* shadcn default — aligned to rb-radius-md (6px) */
 
-    /* Riibon radius scale — 7 steps, modular. Aligned to design-system spec. */
-    --rb-radius-xs:   4px;
-    --rb-radius-sm:   6px;
-    --rb-radius-md:   8px;
-    --rb-radius-lg:   12px;
-    --rb-radius-xl:   16px;
-    --rb-radius-2xl:  20px;
+    /* Riibon radius scale — 7 steps, modular. CHANGED: tightened (was
+       4/6/8/12/16/20) — crisper, more technical. */
+    --rb-radius-xs:   2px;
+    --rb-radius-sm:   4px;
+    --rb-radius-md:   6px;
+    --rb-radius-lg:   8px;
+    --rb-radius-xl:   10px;
+    --rb-radius-2xl:  14px;
     --rb-radius-pill: 999px;
     --rb-radius:      var(--rb-radius-md);
 
@@ -385,19 +413,28 @@
     --rb-text-caption:    var(--rb-text-xs);   --rb-text-caption-lh:  calc(var(--rb-text-xs) * 1.35);   /* 11.2 */
     --rb-text-code:       var(--rb-text-sm);   --rb-text-code-lh:     calc(var(--rb-text-sm) * 1.55);   /* 12.8 */
 
-    --sidebar-background: 72 20% 95%; /* rb-neutral-50 */
-    --sidebar-foreground: 90 13% 13%;
+    --sidebar-background: 80 14% 96%; /* rb-neutral-50 #F5F6F3 */
+    --sidebar-foreground: 90 10% 12%;
     --sidebar-primary: 238 80% 47%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 80 19% 91%;
-    --sidebar-accent-foreground: 90 13% 13%;
-    --sidebar-border: 80 19% 91%;
+    --sidebar-accent: 84 12% 92%;
+    --sidebar-accent-foreground: 90 10% 12%;
+    --sidebar-border: 84 12% 92%;
     --sidebar-ring: 238 80% 47%;
 
-    --chat-user-bg: 72 20% 95%;    /* rb-neutral-50 */
+    /* Brand mark + the chat user bubble — semantic tokens rather than raw
+       palette classes, so future theme work can retarget them in one place. */
+    --rb-brand-mark: var(--rb-blue-500);
+    --rb-chat-user-bubble: var(--rb-blue-500);
+    --rb-chat-user-bubble-fg: var(--rb-neutral-0);
+
+    --chat-user-bg: 80 14% 96%;    /* rb-neutral-50 #F5F6F3 */
     --chat-assistant-bg: 0 0% 100%; /* rb-neutral-0 */
-    --chat-input-bg: 72 20% 95%;
-    --chat-hover: 80 19% 91%;      /* rb-neutral-100 */
+    --chat-input-bg: 80 14% 96%;
+    --chat-hover: 84 12% 92%;      /* rb-neutral-100 #EAECE7 */
+
+    /* Native scrollbars/form controls follow the active scheme. */
+    color-scheme: light;
   }
 
   .dark {
@@ -405,64 +442,70 @@
        canvas, blue-300 accent, yellow reserved for highlight only. The v1
        "Midnight Ops" theme uses a yellow accent instead — see
        docs/design-system/dark-theme-parity.md if/when we want to swap. */
-    --background: 75 22% 4%;       /* rb-neutral-950 */
+    --background: 68 31% 5%;       /* rb-surface-page #101109 (literal) */
     /* Foreground uses cream-100, NOT pure white — matches v1 spec
        (text: '#F4F9F1' in terminalDark). Pure white on near-black is harsh
        (eye strain, OLED vibration); cream-100 is calmer, warmer, better-read. */
-    --foreground: 102 38% 96%;
+    --foreground: 97 40% 96%;
 
-    --card: 77 19% 7%;             /* rb-neutral-900 */
-    --card-foreground: 0 0% 100%;
-    --popover: 77 19% 7%;
-    --popover-foreground: 0 0% 100%;
+    --card: 82 15% 10%;            /* rb-surface-card #1B1E16 (literal — sits above section) */
+    --card-foreground: 97 40% 96%; /* cream-100, matches dark text-primary */
+    --popover: 82 15% 10%;
+    --popover-foreground: 97 40% 96%;
 
     --primary: 236 80% 71%;        /* rb-blue-300 */
-    --primary-foreground: 75 22% 4%;
+    --primary-foreground: 68 31% 5%;
 
-    --secondary: 90 13% 13%;       /* rb-neutral-800 */
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 80 13% 14%;       /* ⚠ rb-surface-elevated #24271E (judgment mapping, D13) */
+    --secondary-foreground: 97 40% 96%;
 
-    --muted: 90 13% 13%;
-    --muted-foreground: 79 16% 80%; /* rb-neutral-200 */
+    --muted: 80 13% 14%;
+    --muted-foreground: 87 6% 72%; /* ⚠ rb-text-secondary #B8BCB3 (D13) */
 
-    --accent: 87 8% 21%;           /* rb-neutral-700 */
-    --accent-foreground: 0 0% 100%;
+    --accent: 90 6% 20%;           /* ⚠ rb-border #32352F, hover fill ≈ neutral-700 (D13) */
+    --accent-foreground: 97 40% 96%;
 
-    --tertiary-foreground: 85 7% 54%;
-    --icon: 79 16% 80%;
-    --icon-muted: 85 7% 54%;
+    --tertiary-foreground: 87 4% 55%; /* rb-text-tertiary #8D9188 */
+    --icon: 87 6% 72%;                 /* ⚠ #B8BCB3 (D13) */
+    --icon-muted: 87 4% 55%;           /* #8D9188 */
 
-    --destructive: 10 64% 46%;     /* rb-terracotta-500 */
+    --destructive: 10 65% 67%;     /* ⚠ dark rb-error (terracotta-300 #E28875) (D13) */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 87 8% 21%;           /* rb-neutral-700 */
-    --input: 87 8% 21%;
+    --border: 90 6% 20%;           /* rb-border #32352F */
+    --input: 90 5% 29%;            /* ⚠ rb-border-strong #494D45 (D13) */
     --ring: 236 80% 71%;
 
-    --sidebar-background: 77 19% 7%; /* rb-neutral-900 */
-    --sidebar-foreground: 0 0% 100%;
+    --sidebar-background: 73 23% 8%; /* rb-surface-section #16180F (literal) */
+    --sidebar-foreground: 97 40% 96%;
     --sidebar-primary: 236 80% 71%;
-    --sidebar-primary-foreground: 75 22% 4%;
-    --sidebar-accent: 87 8% 21%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 87 8% 21%;
+    --sidebar-primary-foreground: 68 31% 5%;
+    --sidebar-accent: 90 6% 20%;
+    --sidebar-accent-foreground: 97 40% 96%;
+    --sidebar-border: 78 14% 14%;   /* ⚠ rb-border-subtle #26291F (D13) */
     --sidebar-ring: 236 80% 71%;
 
-    --chat-user-bg: 90 13% 13%;    /* rb-neutral-800 */
-    --chat-assistant-bg: 77 19% 7%; /* rb-neutral-900 */
-    --chat-input-bg: 90 13% 13%;
-    --chat-hover: 87 8% 21%;       /* rb-neutral-700 */
+    --rb-brand-mark: var(--rb-yellow-300);
 
-    /* Riibon semantic tokens — flip for dark mode */
-    --rb-surface-page:     var(--rb-neutral-950);
-    --rb-surface-section:  var(--rb-neutral-900);
-    --rb-surface-card:     var(--rb-neutral-900);
-    --rb-surface-elevated: var(--rb-neutral-800);
-    --rb-surface-inline:   var(--rb-neutral-800);
-    --rb-surface-ink:      var(--rb-neutral-950);
+    --chat-user-bg: 76 19% 12%;    /* ⚠ rb-surface-inline #202318 (D13) */
+    --chat-assistant-bg: 82 15% 10%; /* rb-surface-card #1B1E16 */
+    --chat-input-bg: 76 19% 12%;
+    --chat-hover: 90 6% 20%;       /* rb-border #32352F */
 
-    /* Borders dark — drop a level into neutral-700/800 */
-    --rb-border-subtle:  var(--rb-neutral-800);
+    /* Riibon semantic tokens — flip for dark mode. Surfaces are literal hexes
+       per handoff (not scale steps) — card now sits ABOVE section (#1B1E16
+       vs #16180F), which was not true before (both resolved to neutral-900).
+       Do NOT rewrite as var(--rb-neutral-*) — see WS1 §1.15 / risk R8. */
+    --rb-surface-page:     #101109;
+    --rb-surface-section:  #16180F;
+    --rb-surface-card:     #1B1E16;
+    --rb-surface-elevated: #24271E;
+    --rb-surface-inline:   #202318;
+    --rb-surface-ink:      #0D0E09;
+
+    /* Borders dark — border-subtle is a literal (no longer a spine step);
+       border / border-strong track the new neutral-700/600 via the spine. */
+    --rb-border-subtle:  #26291F;
     --rb-border:         var(--rb-neutral-700);
     --rb-border-strong:  var(--rb-neutral-600);
 
@@ -491,14 +534,16 @@
     --rb-seq-600: var(--rb-blue-300);
     --rb-seq-700: var(--rb-blue-200);
 
-    /* Diverging ramp dark — softer mid, brighter ends for contrast */
-    --rb-div-neg-3: var(--rb-terracotta-300);
-    --rb-div-neg-2: var(--rb-coral-300);
-    --rb-div-neg-1: var(--rb-coral-700);
-    --rb-div-0:     var(--rb-neutral-700);
-    --rb-div-pos-1: var(--rb-blue-800);
-    --rb-div-pos-2: var(--rb-blue-300);
-    --rb-div-pos-3: var(--rb-blue-200);
+    /* Diverging ramp dark — handoff only re-values the midpoint (--rb-div-0);
+       the ramp ends are DELETED here (D12) and inherit the light-mode
+       values from :root. Do not re-add per-end dark overrides. */
+    --rb-div-0: var(--rb-neutral-700);
+
+    /* Chart chrome dark — NEW per handoff v0.8. */
+    --rb-grid: #26291F;
+    --rb-axis: #666A62;
+    --rb-tooltip-bg: #F4F9F1;
+    --rb-tooltip-fg: #1E211B;
 
     --rb-success:        var(--rb-forest-300);
     --rb-success-bg:     rgba(47, 122, 63, 0.14);
@@ -520,6 +565,17 @@
     --rb-info-border:    var(--rb-blue-700);
     --rb-info-strong:    var(--rb-blue-100);
 
+    /* Chart data fills — brighter, luminance flipped so higher = brighter
+       and the strong-blue steps stay visible on the dark canvas. */
+    --rb-chart-demand-peak:     #57C06E;
+    --rb-chart-demand-shoulder: #F0B72E;
+    --rb-chart-demand-off:      #E8694C;
+    --rb-chart-demand-none:     #4A5043;
+    --rb-chart-eff-1:           #4B4FA8;
+    --rb-chart-eff-2:           #6D74E3;
+    --rb-chart-eff-3:           #99A2FB;
+    --rb-chart-eff-4:           #C7CDFF;
+
     --rb-highlight:      var(--rb-yellow-300);
     --rb-highlight-bg:   rgba(246, 221, 83, 0.14);
     --rb-highlight-border: var(--rb-yellow-600);
@@ -534,6 +590,9 @@
     /* Primary data-viz tokens can shift lighter for contrast on dark */
     --rb-viz-1: var(--rb-blue-300);
     --rb-viz-5: var(--rb-plum-300);
+
+    /* Native scrollbars/form controls follow the active scheme. */
+    color-scheme: dark;
   }
 }
 
@@ -555,6 +614,15 @@
 
   body {
     @apply bg-background text-foreground;
+    /* The app shell is a fixed-height layout (h-screen sidebar + content
+       panes, each with its own overflow-y-auto region) — the document
+       itself is never meant to scroll. Without this, once an inner pane's
+       scroll is exhausted, trackpad/wheel input chains up to the document
+       and rubber-bands it, revealing blank space below the fixed shell
+       (the sidebar/content appear to "scroll up" past the end of their own
+       content). Belt to `.rb-scroll`'s per-region `overscroll-behavior`
+       brace below. */
+    overscroll-behavior-y: none;
   }
 
   /* Riibon typography defaults — applied globally so headings + code adopt
@@ -621,9 +689,12 @@
 .rb-caption  { font-family: var(--font-sans); font-size: var(--rb-text-xs);  line-height: var(--rb-leading-snug); color: var(--rb-text-secondary); }
 .rb-overline { font-family: var(--font-mono); font-size: var(--rb-text-2xs); line-height: 1; letter-spacing: var(--rb-track-caps); text-transform: uppercase; color: var(--rb-text-secondary); font-weight: 600; }
 
-.rb-num-display { font-family: var(--font-display); font-weight: 600; font-size: var(--rb-text-4xl); line-height: var(--rb-leading-flat); letter-spacing: var(--rb-track-display); font-variant-numeric: tabular-nums; }
-.rb-num-large   { font-family: var(--font-display); font-weight: 600; font-size: var(--rb-text-3xl); line-height: var(--rb-leading-flat); letter-spacing: var(--rb-track-tight); font-variant-numeric: tabular-nums; }
-.rb-num-medium  { font-family: var(--font-display); font-weight: 600; font-size: var(--rb-text-xl);  line-height: var(--rb-leading-flat); font-variant-numeric: tabular-nums; }
+.rb-num-display { font-family: var(--font-mono); font-weight: 600; font-size: var(--rb-text-4xl); line-height: var(--rb-leading-flat); letter-spacing: var(--rb-track-display); font-variant-numeric: tabular-nums; }
+.rb-num-large   { font-family: var(--font-mono); font-weight: 600; font-size: var(--rb-text-3xl); line-height: var(--rb-leading-flat); letter-spacing: var(--rb-track-tight); font-variant-numeric: tabular-nums; }
+.rb-num-medium  { font-family: var(--font-mono); font-weight: 600; font-size: var(--rb-text-xl);  line-height: var(--rb-leading-flat); font-variant-numeric: tabular-nums; }
+/* Base numeral utility (D11) — every metric/table figure/axis tick uses
+   mono tabular numerals; no Bricolage numeral exception. */
+.rb-num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: var(--rb-track-mono); }
 
 .rb-code { font-family: var(--font-mono); font-size: 12.5px; background: var(--rb-neutral-50); border: 1px solid var(--rb-border-subtle); padding: 1px 6px; border-radius: 4px; color: var(--rb-text-primary); }
 .rb-kbd  { font-family: var(--font-mono); font-size: 10.5px; background: var(--rb-neutral-50); border: 1px solid var(--rb-border); border-bottom-width: 2px; padding: 1px 6px; border-radius: 4px; color: var(--rb-text-secondary); font-weight: 500; }
@@ -640,11 +711,15 @@
 }
 .rb-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgba(32, 36, 28, 0.2) transparent;
+  scrollbar-color: rgba(30, 33, 27, 0.2) transparent;
+  /* Stop scroll chaining at this region's edge instead of bubbling to the
+     next scrollable ancestor (up to the document, see body{} above) once
+     this region's own scroll is exhausted. */
+  overscroll-behavior: contain;
 }
 .rb-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
 .rb-scroll::-webkit-scrollbar-thumb {
-  background: rgba(32, 36, 28, 0.18);
+  background: rgba(30, 33, 27, 0.18);
   border-radius: 4px;
 }
 .rb-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -838,7 +913,7 @@
   cursor: grab;
   color: hsl(var(--muted-foreground));
   opacity: 0;
-  transition: opacity 0.15s;
+  transition: opacity var(--rb-dur-fast) var(--rb-ease);
   border-radius: 4px;
   z-index: 10;
 }

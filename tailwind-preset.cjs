@@ -7,7 +7,7 @@ module.exports = {
      (variant props, theme-driven choice, etc.) so dynamic class names never
      silently drop. Adds ~3KB of CSS — worth it for system reliability. */
   safelist: [
-    { pattern: /^shadow-rb-(xs|sm|md|lg|xl|ring)$/ },
+    { pattern: /^shadow-rb-(xs|sm|md|lg|xl|ring|offset-lg|offset-sm)$/ },
     { pattern: /^animate-rb-(pulse|blink|slide-up|slide-left|fade-in|scan|grow|marquee|shimmer|fade-up)$/ },
     { pattern: /^(ease|duration)-rb(-(in|out|in-out|fast|base|slow|slower))?$/ },
     { pattern: /^rounded-rb-(xs|sm|md|lg|xl|2xl|pill)$/ },
@@ -241,6 +241,11 @@ module.exports = {
           "border-subtle": "var(--rb-border-subtle)",
           "border-DEFAULT": "var(--rb-border)",
           "border-strong": "var(--rb-border-strong)",
+          /* Chart chrome tokens (Recharts grid/axis/tooltip) */
+          "grid": "var(--rb-grid)",
+          "axis": "var(--rb-axis)",
+          "tooltip-bg": "var(--rb-tooltip-bg)",
+          "tooltip-fg": "var(--rb-tooltip-fg)",
           /* Text tiers */
           "text-primary":   "var(--rb-text-primary)",
           "text-secondary": "var(--rb-text-secondary)",
@@ -282,6 +287,9 @@ module.exports = {
         "rb-lg": "var(--rb-shadow-lg)",
         "rb-xl": "var(--rb-shadow-xl)",
         "rb-ring": "var(--rb-ring)",
+        /* Offset hard-shadow — marketing-register brand element (D4). */
+        "rb-offset-lg": "var(--rb-shadow-offset-lg)",
+        "rb-offset-sm": "var(--rb-shadow-offset-sm)",
       },
       borderRadius: {
         lg: "var(--radius)",

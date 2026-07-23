@@ -1,7 +1,16 @@
 import type { LucideIcon } from "lucide-react";
+import type { ComponentType, SVGProps } from "react";
 export type IconSize = "sm" | "md" | "lg";
+/** A renderable icon component: a Lucide icon (the default) OR a vendor
+ *  brand-mark SVG component (react-icons style — accepts `size` + the
+ *  standard SVG props). Per the design-system rules vendor marks (Meta,
+ *  Google) are rendered by wrapping them in <Icon>, so the prop must admit
+ *  both shapes, not just `LucideIcon`. */
+export type IconComponent = LucideIcon | ComponentType<SVGProps<SVGSVGElement> & {
+    size?: number | string;
+}>;
 interface IconProps {
-    icon: LucideIcon;
+    icon: IconComponent;
     /** Named token (16/20/24) or an exact pixel value for the rare case
      *  where a smaller hit-target is needed (e.g. inline kebab menus at
      *  12-14px). Prefer the named tokens. */
