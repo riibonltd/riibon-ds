@@ -266,6 +266,27 @@
     --rb-tooltip-bg: #1E211B;
     --rb-tooltip-fg: #FFFFFF;
 
+    /* Per-source identity colours (conversion-source lines, chips, connector
+       accents — TrackedConversionsChart & friends). Sources need STABLE
+       identity colours across every surface, which a positional viz-ramp
+       assignment can't give (the visible-source set varies per brand), so
+       each source gets its own token aliased to a brand-scale step. Dark
+       re-points the low-luminance ones below. GAP-AUDIT-2 fix B1. */
+    --rb-source-meta:     var(--rb-blue-500);
+    --rb-source-google:   var(--rb-forest-500);
+    --rb-source-ga4:      var(--rb-ochre-300);
+    --rb-source-posthog:  var(--rb-coral-400);
+    --rb-source-stripe:   var(--rb-plum-500);
+    /* yellow-600 (not -400): -400 sits at ~1.85:1 on a white card (below
+       the 3:1 non-text minimum) and is a near-identical mustard to ga4's
+       ochre-300 (review follow-up) — yellow-600 clears 5:1 and separates
+       clearly from ochre-300; dark gets an explicit lift below since -600
+       is too olive-dark to read as an accent on the dark canvas. */
+    --rb-source-tally:    var(--rb-yellow-600);
+    --rb-source-calendly: var(--rb-blue-300);
+    --rb-source-tiktok:   var(--rb-sage-500);
+    --rb-source-reddit:   var(--rb-terracotta-500);
+
     /* ─── shadcn HSL tokens, mapped to Riibon palette ─── */
     /* Page + card: surface-page canvas (literal, not a scale step), pure white cards */
     --background: 0 0% 99%;        /* rb-surface-page #FCFCFC */
@@ -413,7 +434,11 @@
     --rb-text-caption:    var(--rb-text-xs);   --rb-text-caption-lh:  calc(var(--rb-text-xs) * 1.35);   /* 11.2 */
     --rb-text-code:       var(--rb-text-sm);   --rb-text-code-lh:     calc(var(--rb-text-sm) * 1.55);   /* 12.8 */
 
-    --sidebar-background: 80 14% 96%; /* rb-neutral-50 #F5F6F3 */
+    --sidebar-background: 210 8% 95%; /* rb-surface-inline #F2F3F4 — corrected 2026-07-24: WS1's
+       original table + tokens.css both specify neutral-50 #F5F6F3, but the handoff's own
+       01-data-light.png mockup renders the sidebar at a uniform #F2F3F4 (verified by pixel-sampling
+       the PNG directly, sampled at ~15 points, zero variance) — surface-inline, not neutral-50. The
+       written spec and the visual reference disagreed; the visual reference wins (owner-reported). */
     --sidebar-foreground: 90 10% 12%;
     --sidebar-primary: 238 80% 47%;
     --sidebar-primary-foreground: 0 0% 100%;
@@ -476,7 +501,11 @@
     --input: 90 5% 29%;            /* ⚠ rb-border-strong #494D45 (D13) */
     --ring: 236 80% 71%;
 
-    --sidebar-background: 73 23% 8%; /* rb-surface-section #16180F (literal) */
+    --sidebar-background: 76 19% 12%; /* rb-surface-inline #202318 — corrected 2026-07-24, same
+       mockup-vs-tokens.css disagreement as the light block above: 08-data-dark.png's sidebar
+       samples uniformly to #202318 (verified by pixel-sampling), matching --rb-surface-inline dark
+       exactly (already defined elsewhere, e.g. the --chat-user-bg D13 comment), not surface-section
+       #16180F as WS1's table specified. */
     --sidebar-foreground: 97 40% 96%;
     --sidebar-primary: 236 80% 71%;
     --sidebar-primary-foreground: 68 31% 5%;
@@ -545,6 +574,22 @@
     --rb-tooltip-bg: #F4F9F1;
     --rb-tooltip-fg: #1E211B;
 
+    /* Source identity colours — lift the low-luminance ones for the dark
+       canvas; calendly moves to blue-200 so it stays separable from meta
+       (which lifts to blue-300 here). GAP-AUDIT-2 fix B1. posthog gets an
+       explicit dark step too: left unset it falls back to the light coral-400
+       literal, which sits too close to reddit's lifted terracotta-300 on the
+       dark chart canvas (review follow-up) — coral-300 keeps the warm
+       register but separates on lightness/saturation from reddit's more
+       saturated orange-red. */
+    --rb-source-meta:     var(--rb-blue-300);
+    --rb-source-google:   var(--rb-forest-300);
+    --rb-source-posthog:  var(--rb-coral-300);
+    --rb-source-stripe:   var(--rb-plum-300);
+    --rb-source-tally:    var(--rb-yellow-400);
+    --rb-source-calendly: var(--rb-blue-200);
+    --rb-source-reddit:   var(--rb-terracotta-300);
+
     --rb-success:        var(--rb-forest-300);
     --rb-success-bg:     rgba(47, 122, 63, 0.14);
     --rb-success-border: var(--rb-forest-700);
@@ -558,7 +603,7 @@
     --rb-error:          var(--rb-terracotta-300);
     --rb-error-bg:       rgba(192, 67, 42, 0.18);
     --rb-error-border:   var(--rb-terracotta-700);
-    --rb-error-strong:   #FBEAE6;
+    --rb-error-strong:   var(--rb-terracotta-50);
 
     --rb-info:           var(--rb-blue-300);
     --rb-info-bg:        rgba(24, 31, 217, 0.20);
@@ -711,7 +756,10 @@
 }
 .rb-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgba(30, 33, 27, 0.2) transparent;
+  /* Thumb derives from the scheme's primary text colour so it flips with
+     the theme — the previous hardcoded ink rgba was near-invisible on the
+     dark canvases (GAP-AUDIT-2 fix C4). */
+  scrollbar-color: color-mix(in srgb, var(--rb-text-primary) 20%, transparent) transparent;
   /* Stop scroll chaining at this region's edge instead of bubbling to the
      next scrollable ancestor (up to the document, see body{} above) once
      this region's own scroll is exhausted. */
@@ -719,7 +767,7 @@
 }
 .rb-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
 .rb-scroll::-webkit-scrollbar-thumb {
-  background: rgba(30, 33, 27, 0.18);
+  background: color-mix(in srgb, var(--rb-text-primary) 18%, transparent);
   border-radius: 4px;
 }
 .rb-scroll::-webkit-scrollbar-track { background: transparent; }

@@ -37,6 +37,7 @@ module.exports = {
         "rb-h1":       ["var(--rb-text-h1)",       { lineHeight: "var(--rb-text-h1-lh)",       letterSpacing: "-0.02em", fontWeight: "600" }],
         "rb-h2":       ["var(--rb-text-h2)",       { lineHeight: "var(--rb-text-h2-lh)",       letterSpacing: "-0.015em", fontWeight: "600" }],
         "rb-h3":       ["var(--rb-text-h3)",       { lineHeight: "var(--rb-text-h3-lh)",       letterSpacing: "-0.01em",  fontWeight: "600" }],
+        "rb-h4":       ["var(--rb-text-xl)",       { lineHeight: "var(--rb-leading-snug)",     letterSpacing: "var(--rb-track-tight)", fontWeight: "600" }],
         "rb-body-lg":  ["var(--rb-text-body-lg)",  { lineHeight: "var(--rb-text-body-lg-lh)",  letterSpacing: "-0.005em", fontWeight: "400" }],
         "rb-body":     ["var(--rb-text-body)",     { lineHeight: "var(--rb-text-body-lh)",     letterSpacing: "0",        fontWeight: "400" }],
         "rb-body-sm":  ["var(--rb-text-body-sm)",  { lineHeight: "var(--rb-text-body-sm-lh)",  letterSpacing: "0",        fontWeight: "400" }],
