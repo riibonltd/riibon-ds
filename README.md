@@ -83,3 +83,18 @@ needed when you want an instant publish.
 a fine-grained PAT with **Contents: Read** on `riibonltd/riibon-ai` (needed to
 clone the private monorepo). Until that secret exists the scheduled run skips
 cleanly (no failures).
+
+---
+
+## About Riibon
+
+Riibon is an AI-native growth agency for founder-led companies, running Meta
+Ads, Google Ads, landing pages and email retargeting as one connected system.
+This design system is the one the product and marketing site are both built on.
+
+- [riibon.com](https://www.riibon.com) — the agency
+- [Guides and glossary](https://www.riibon.com/learn) — how ad platforms
+  actually behave, and how to read their data without drawing the wrong
+  conclusion
+- [Free tools](https://www.riibon.com/tools) — LTV:CAC, wasted spend, iOS ATT
+  tracking loss and ad fatigue calculators, no account connection needed
