@@ -64,6 +64,12 @@
     --rb-neutral-200: #D7DAD3;
     --rb-neutral-300: #B8BCB3;
     --rb-neutral-400: #8D9188;
+    /* Half-step. Exists because neutral-400 is the lightest neutral that can
+       carry text on a DARK surface, and neutral-500 is the darkest that reads
+       as "quieter than body" on a LIGHT one — on white there is no room
+       between them that also clears 4.5:1. Light-mode tertiary text sits
+       here: 5.13:1 on white, 4.57:1 on the sidebar's neutral-50. */
+    --rb-neutral-450: #6B6F67;
     --rb-neutral-500: #666A62;
     --rb-neutral-600: #494D45;
     --rb-neutral-700: #32352F;
@@ -205,7 +211,12 @@
     /* Text — 5 levels, drawn from neutral spine + brand */
     --rb-text-primary:   var(--rb-neutral-800);
     --rb-text-secondary: var(--rb-neutral-500);
-    --rb-text-tertiary:  var(--rb-neutral-400);
+    /* NOT neutral-400. Tertiary is the only text level that used to hold the
+       same neutral in both themes, which is right for dark (see the dark
+       block's "keep tertiary muted") and wrong for light: neutral-400 on
+       white is 3.21:1, and on the sidebar 2.87:1 — under AA, on the 10-11px
+       uppercase labels that name every nav group and control. */
+    --rb-text-tertiary:  var(--rb-neutral-450);
     --rb-text-inverse:   var(--rb-neutral-0);
     --rb-text-accent:    var(--rb-blue-500);
     /* Placeholder — its own semantic role, separate from muted-foreground
@@ -286,6 +297,13 @@
     --rb-source-calendly: var(--rb-blue-300);
     --rb-source-tiktok:   var(--rb-sage-500);
     --rb-source-reddit:   var(--rb-terracotta-500);
+    /* Bubble shares the sage family with tiktok because every other hue in the
+       brand scale is already a source identity. That is safe ONLY because
+       tiktok has hasCountBackend:false (shared/source-registry.ts) — it renders
+       null counts, never a line, so the two can't appear on one chart. If a
+       TikTok query backend ever ships, give Bubble its own hue first. sage-500
+       in light for the 3:1 floor on a white card; sage-300 lifted in dark. */
+    --rb-source-bubble:   var(--rb-sage-500);
 
     /* ─── shadcn HSL tokens, mapped to Riibon palette ─── */
     /* Page + card: surface-page canvas (literal, not a scale step), pure white cards */
@@ -589,6 +607,7 @@
     --rb-source-tally:    var(--rb-yellow-400);
     --rb-source-calendly: var(--rb-blue-200);
     --rb-source-reddit:   var(--rb-terracotta-300);
+    --rb-source-bubble:   var(--rb-sage-300);
 
     --rb-success:        var(--rb-forest-300);
     --rb-success-bg:     rgba(47, 122, 63, 0.14);
@@ -634,10 +653,37 @@
 
     /* Primary data-viz tokens can shift lighter for contrast on dark */
     --rb-viz-1: var(--rb-blue-300);
+    /* viz-2 is forest-500 (#2F7A3F) in light — the darkest hue in the
+       categorical palette, and the only one that was left unflipped here. On
+       the dark chart surface it reads 3.22:1, so every legend label and thin
+       series stroke drawn in it fell under AA. forest-300 restores 5.75:1. */
+    --rb-viz-2: var(--rb-forest-300);
     --rb-viz-5: var(--rb-plum-300);
 
     /* Native scrollbars/form controls follow the active scheme. */
     color-scheme: dark;
+  }
+
+  /* ── Admin app — wordmark tint ───────────────────────────────────────
+     The Admin app (operator tooling, /admin/*) drops the wordmark from the
+     brand colour to a muted neutral, so the rail reads as internal tooling
+     rather than the product. Paired with the "Admin" qualifier beside it,
+     that is two independent cues without touching a brand surface.
+
+     Deliberately overrides ONE existing token rather than introducing a new
+     one, and re-points it at `--rb-text-secondary`, which already resolves
+     per scheme (neutral-500 light, neutral-300 dark) — so this needs no
+     light/dark pair of its own and cannot drift out of sync.
+
+     Scoped by `data-app="admin"` on the sidebar brand row. The only other
+     consumer of --rb-brand-mark is AuthFrame (the signed-out screen), which
+     is never inside Admin, so nothing else moves.
+
+     NOT changing --sidebar-background: that value was pixel-sampled from
+     the WS1 mockups and corrected 2026-07-24, and diverging per-app would
+     partially undo that work and mirror out to @riibon/ds. */
+  [data-app="admin"] {
+    --rb-brand-mark: var(--rb-text-secondary);
   }
 }
 
