@@ -39,6 +39,63 @@ if (run("git status --porcelain").trim()) {
   process.exit(1);
 }
 
+/**
+ * --- guard: the SOURCE is actually what's on main ---
+ *
+ * `appPath` defaults to ../riibon-ai and was previously trusted blind. That
+ * checkout is a normal working copy: it can sit on an old commit, on another
+ * branch, or carry half-finished edits. Syncing from it regardless is how you
+ * publish a release that silently OMITS the change you just merged — the
+ * mirror looks updated, the version bumps, external consumers pin the new tag,
+ * and the fix simply isn't in it. Nothing downstream can detect that.
+ *
+ * Checked per PUBLISHED path rather than over the whole repo, because the
+ * monorepo nearly always has unrelated work in flight and blocking on that
+ * would just train people to reach for --force-source.
+ */
+const SYNCED_PATHS = ["packages/ui/src", "src/index.css", "tailwind.config.ts"];
+const forceSource = args.includes("--force-source");
+
+const inApp = (cmd) => run(cmd, { cwd: appPath });
+
+if (!fs.existsSync(path.join(appPath, ".git"))) {
+  console.error(`✗ ${appPath} is not a git checkout — cannot verify what would be published.`);
+  process.exit(1);
+}
+
+// Refresh origin/main first: comparing against a stale remote ref would let a
+// months-old checkout pass as "matches main".
+try {
+  inApp("git fetch origin main --quiet");
+} catch {
+  console.warn("⚠ could not fetch origin/main in the source repo — comparing against the local ref.");
+}
+
+const drifted = SYNCED_PATHS.filter((p) => {
+  try {
+    inApp(`git diff --quiet origin/main -- "${p}"`);
+    return false;
+  } catch {
+    return true; // non-zero exit = differs from origin/main
+  }
+});
+
+if (drifted.length) {
+  const label = forceSource ? "⚠" : "✗";
+  console.error(
+    `${label} Source is not at origin/main for the paths this release publishes:\n` +
+      drifted.map((p) => `    ${p}`).join("\n") +
+      `\n  source: ${appPath}\n` +
+      `  Either it is behind origin/main, or it has uncommitted edits to these paths.\n` +
+      `  Pull/merge it (or pass a checkout that is up to date), then re-run.\n` +
+      `  To publish from this source anyway: --force-source`,
+  );
+  if (!forceSource) process.exit(1);
+  console.warn("  … continuing because --force-source was passed.");
+} else {
+  console.log(`✓ source matches origin/main for all ${SYNCED_PATHS.length} published paths`);
+}
+
 // --- 1) sync from the monorepo, 2) rebuild ---
 console.log("• sync from monorepo…");
 run(`node scripts/sync-from-app.mjs "${appPath}"`, { stdio: "inherit" });
