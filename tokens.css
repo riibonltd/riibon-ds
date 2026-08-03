@@ -328,7 +328,6 @@
     --accent: 84 12% 92%;          /* rb-neutral-100 #EAECE7 */
     --accent-foreground: 90 10% 12%;
 
-    --tertiary-foreground: 87 4% 55%; /* rb-neutral-400 #8D9188 */
     --icon: 90 4% 40%;                /* rb-neutral-500 #666A62 */
     --icon-muted: 87 4% 55%;          /* rb-neutral-400 #8D9188 */
 
@@ -508,7 +507,6 @@
     --accent: 90 6% 20%;           /* ⚠ rb-border #32352F, hover fill ≈ neutral-700 (D13) */
     --accent-foreground: 97 40% 96%;
 
-    --tertiary-foreground: 87 4% 55%; /* rb-text-tertiary #8D9188 */
     --icon: 87 6% 72%;                 /* ⚠ #B8BCB3 (D13) */
     --icon-muted: 87 4% 55%;           /* #8D9188 */
 

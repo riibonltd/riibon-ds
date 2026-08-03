@@ -80,7 +80,6 @@ module.exports = {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
-        "tertiary-foreground": "hsl(var(--tertiary-foreground))",
         icon: {
           DEFAULT: "hsl(var(--icon))",
           muted: "hsl(var(--icon-muted))",
