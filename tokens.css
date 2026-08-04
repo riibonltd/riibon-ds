@@ -109,6 +109,33 @@
     --rb-yellow-500: #AE971F;
     --rb-yellow-600: #806F13;
 
+    /* Amber scale — the STATUS warning hue, distinct from the brand yellow
+       above.
+
+       Warning used to map to the coral ramp, which put it 2 DEGREES of hue
+       from terracotta (error): coral-400 sits at 8°, terracotta-500 at 10°.
+       Two adjacent reds are not a judgement call about taste, they are an
+       unreadable status scale — "watch" and "costing money today" rendered as
+       effectively the same colour, most visibly in a gauge's band track where
+       they sit side by side. Amber puts them 27° apart.
+
+       Why not reuse --rb-yellow: that ramp is the brand accent and backs
+       --rb-highlight (Badge variant="highlight") plus the dark-mode brand
+       mark. Pointing warning at it would make a warning chip and a highlight
+       chip the same colour, which is the same collision one hue over.
+
+       Anchored at hue 37° — far enough from terracotta (10°) to separate the
+       status scale, far enough from yellow-300 (51°) not to read as the
+       accent. Every step below is contrast-checked in both themes; see
+       docs/design-system/accessibility.md. */
+    --rb-amber-50:  #FCF3E3;
+    --rb-amber-100: #F6DEB6;
+    --rb-amber-300: #EFAF48;
+    --rb-amber-400: #DF8E0C;
+    --rb-amber-500: #B17006;
+    --rb-amber-600: #8A5705;
+    --rb-amber-700: #5D3B04;
+
     /* Cream scale */
     --rb-cream-50:  #FBFDF9;
     --rb-cream-100: #F4F9F1;
@@ -145,6 +172,10 @@
     --rb-coral-400-hsl: 8 51% 59%;
     --rb-coral-500-hsl: 8 41% 49%;
     --rb-coral-600-hsl: 8 43% 43%;
+    --rb-amber-300-hsl: 37 84% 61%;
+    --rb-amber-400-hsl: 37 90% 46%;
+    --rb-amber-500-hsl: 37 93% 36%;
+    --rb-amber-600-hsl: 37 93% 28%;
     --rb-yellow-300-hsl: 51 90% 65%;
     --rb-yellow-500-hsl: 48 69% 40%;
     --rb-yellow-600-hsl: 48 73% 29%;
@@ -163,10 +194,10 @@
     --rb-success-border: var(--rb-forest-100);
     --rb-success-strong: var(--rb-forest-700);
 
-    --rb-warning:        var(--rb-coral-400);
-    --rb-warning-bg:     var(--rb-coral-50);
-    --rb-warning-border: var(--rb-coral-100);
-    --rb-warning-strong: var(--rb-coral-600);
+    --rb-warning:        var(--rb-amber-400);
+    --rb-warning-bg:     var(--rb-amber-50);
+    --rb-warning-border: var(--rb-amber-100);
+    --rb-warning-strong: var(--rb-amber-600);
 
     --rb-error:          var(--rb-terracotta-500);
     --rb-error-bg:       var(--rb-terracotta-50);
@@ -612,10 +643,10 @@
     --rb-success-border: var(--rb-forest-700);
     --rb-success-strong: var(--rb-forest-100);
 
-    --rb-warning:        var(--rb-coral-300);
-    --rb-warning-bg:     rgba(203, 110, 96, 0.14);
-    --rb-warning-border: var(--rb-coral-700);
-    --rb-warning-strong: var(--rb-coral-100);
+    --rb-warning:        var(--rb-amber-300);
+    --rb-warning-bg:     rgba(223, 142, 12, 0.14);
+    --rb-warning-border: var(--rb-amber-700);
+    --rb-warning-strong: var(--rb-amber-100);
 
     --rb-error:          var(--rb-terracotta-300);
     --rb-error-bg:       rgba(192, 67, 42, 0.18);

@@ -137,6 +137,15 @@ module.exports = {
             700: "var(--rb-coral-700)",
             800: "var(--rb-coral-800)",
           },
+          amber: {
+            50: "var(--rb-amber-50)",
+            100: "var(--rb-amber-100)",
+            300: "hsl(var(--rb-amber-300-hsl) / <alpha-value>)",
+            400: "hsl(var(--rb-amber-400-hsl) / <alpha-value>)",
+            500: "hsl(var(--rb-amber-500-hsl) / <alpha-value>)",
+            600: "hsl(var(--rb-amber-600-hsl) / <alpha-value>)",
+            700: "var(--rb-amber-700)",
+          },
           yellow: {
             DEFAULT: "var(--rb-yellow)",
             50: "var(--rb-yellow-50)",

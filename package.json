@@ -1,6 +1,6 @@
 {
   "name": "@riibon/ds",
-  "version": "3.1.2",
+  "version": "3.2.0",
   "description": "Riibon design-system primitives + tokens. Distributable mirror of the monorepo's @riibon/ui (riibon-ai/packages/ui), with tokens.css + Tailwind preset, for repos outside the monorepo.",
   "license": "UNLICENSED",
   "type": "module",
