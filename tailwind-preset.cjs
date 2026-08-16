@@ -260,6 +260,7 @@ module.exports = {
           "text-secondary": "var(--rb-text-secondary)",
           "text-tertiary":  "var(--rb-text-tertiary)",
           "text-inverse":   "var(--rb-text-inverse)",
+          "text-on-ink":    "var(--rb-text-on-ink)",
           "text-accent":    "var(--rb-text-accent)",
           "text-placeholder": "var(--rb-text-placeholder)",
           /* Sequential viz ramp */

@@ -249,6 +249,26 @@
        uppercase labels that name every nav group and control. */
     --rb-text-tertiary:  var(--rb-neutral-450);
     --rb-text-inverse:   var(--rb-neutral-0);
+    /* Text on `--rb-surface-ink`. NOT the same thing as text-inverse, and the
+       difference is the whole reason this token exists.
+
+       `text-inverse` means "text on the surface that is the INVERSE of the
+       canvas", so it flips with the scheme: white in light, ink in dark. That
+       is correct for a surface which also flips (the chart tooltip, whose
+       `--rb-tooltip-fg` resolves to exactly these two values).
+
+       `--rb-surface-ink` does NOT flip. It is dark in both themes — #1E211B in
+       light, #0D0E09 in dark — because it also backs progress-bar fills and the
+       TerminalCard ink panel, which are meant to read as ink in both. Pairing
+       it with `text-inverse` therefore put #1E211B on #0D0E09 in dark mode:
+       1.19:1, i.e. every ink button's label disappeared. It shipped that way in
+       15 places (segmented controls, Kanban and Seasonality filters, the copy-
+       lab sync button, the forecast and funnel-builder actions) because the
+       pairing is right in light mode, which is where it was looked at.
+
+       So this stays neutral-0 in BOTH themes, and has no `.dark` override on
+       purpose — adding one would recreate the bug. */
+    --rb-text-on-ink:    var(--rb-neutral-0);
     --rb-text-accent:    var(--rb-blue-500);
     /* Placeholder — its own semantic role, separate from muted-foreground
        (which doubles as card-description / secondary body text). Sits
