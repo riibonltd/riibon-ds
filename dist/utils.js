@@ -40,10 +40,49 @@ const RB_FONT_SIZES = [
     "rb-mini-sm",
     "rb-cell",
 ];
+/**
+ * The same bug as the font-size one above, for every OTHER kind of token — and
+ * this is the one that quietly defeated the design system.
+ *
+ * `tailwind-merge` resolves a conflict only between classes it puts in the same
+ * group, and it derives groups from Tailwind's STOCK names. Riibon's geometry
+ * tokens (`h-rb-control`, `px-rb-control`, `rounded-rb-card`, `gap-rb-5`) are
+ * custom `theme` names, so the merger did not recognise them as heights,
+ * paddings, radii or gaps at all. Only `font-size` had ever been registered.
+ *
+ * The consequence is silent and it is severe: **a shared class could not
+ * override a stock one.** `cn("h-10 px-3", BAR_CONTROL)` kept BOTH `h-10` and
+ * `h-rb-control`, and which one won came down to CSS source order rather than
+ * to what the author wrote. So a control handed the shared bar class still
+ * rendered at the primitive's own 40px, the call site looked correct, and the
+ * guard that read the call site agreed with it.
+ *
+ * That is why "one bar, one control" could be recorded as done while every
+ * dropdown in the app was 8px taller than the buttons beside it. The fix was
+ * never at the call sites; it was here.
+ *
+ * Registered by PATTERN rather than by list. A list would need updating every
+ * time a token is added, and a stale list fails the same silent way — see the
+ * CLAUDE.md rule about a guard carrying its own private copy of the list it
+ * enforces.
+ */
+const isRbToken = (value) => value.startsWith("rb-");
+/** Every group whose values come from `theme.spacing`, plus the geometry
+ *  groups that take their own scale. */
+const RB_SPACING_GROUPS = [
+    "p", "px", "py", "pt", "pr", "pb", "pl",
+    "m", "mx", "my", "mt", "mr", "mb", "ml",
+    "gap", "gap-x", "gap-y",
+    "space-x", "space-y",
+    "w", "h", "min-h", "min-w", "max-w", "size",
+    "top", "right", "bottom", "left", "inset",
+];
 const twMerge = extendTailwindMerge({
     extend: {
         classGroups: {
             "font-size": [{ text: [...RB_FONT_SIZES] }],
+            rounded: [{ rounded: [isRbToken] }],
+            ...Object.fromEntries(RB_SPACING_GROUPS.map((g) => [g, [{ [g]: [isRbToken] }]])),
         },
     },
 });

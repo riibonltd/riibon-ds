@@ -9,9 +9,16 @@ const COLS_MD = {
     "1": "md:grid-cols-1", "2": "md:grid-cols-2", "3": "md:grid-cols-3",
     "4": "md:grid-cols-4", "5": "md:grid-cols-5", "6": "md:grid-cols-6", "12": "md:grid-cols-12",
 };
+/* Gap steps map to the rb spacing scale BY VALUE, not by name — the two
+   scales are offset. Tailwind's gap-N is N*4px; --rb-space-N is
+   0/2/4/8/12/16/20/24/32/40/48/64/96. So gap="4" is 16px, which is
+   --rb-space-5, not --rb-space-4 (12px). Renaming the prop would touch
+   ~1,000 call sites, so the prop keeps its meaning and the mapping absorbs
+   the offset. Every value below is byte-identical in px to what it replaced;
+   this moved the primitives onto tokens without moving a pixel. */
 const GAP = {
-    "0": "gap-0", "1": "gap-1", "2": "gap-2", "3": "gap-3", "4": "gap-4",
-    "5": "gap-5", "6": "gap-6", "8": "gap-8", "10": "gap-10",
+    "0": "gap-rb-0", "1": "gap-rb-2", "2": "gap-rb-3", "3": "gap-rb-4", "4": "gap-rb-5",
+    "5": "gap-rb-6", "6": "gap-rb-7", "8": "gap-rb-8", "10": "gap-rb-9",
 };
 /** Responsive grid primitive. Defaults to 1-up on mobile, `cols` columns from md up. */
 export const Grid = React.forwardRef(({ cols = "3", mobileCols = "1", gap = "4", className, ...rest }, ref) => (_jsx("div", { ref: ref, className: cn("grid", COLS[mobileCols], COLS_MD[cols], GAP[gap], className), ...rest })));

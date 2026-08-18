@@ -8,8 +8,8 @@
 
 /* Drag-and-drop visual feedback */
 .react-grid-item.react-grid-placeholder {
-  background: hsl(var(--primary) / 0.15);
-  border: 2px dashed hsl(var(--primary) / 0.4);
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  border: 2px dashed color-mix(in srgb, var(--primary) 40%, transparent);
   border-radius: 0.5rem;
   opacity: 1;
 }
@@ -50,9 +50,9 @@
     --font-serif: 'Instrument Serif', ui-serif, Georgia, serif;
 
     /* ─── Riibon brand palette (hex, for direct reference) ─── */
-    --rb-blue: #181FD9;
+    --rb-blue: var(--rb-blue-500);
     --rb-coral: #CB6E60;
-    --rb-yellow: #F6DD53;
+    --rb-yellow: var(--rb-yellow-300);
     --rb-cream: #F4F9F1;
     --rb-ink: #1E211B;
 
@@ -84,10 +84,23 @@
     --rb-blue-300: #7B82F0;
     --rb-blue-400: #4F58E6;
     --rb-blue-500: #181FD9;
+
     --rb-blue-600: #1218A8;
     --rb-blue-700: #0E127F;
     --rb-blue-800: #0B0E66;
     --rb-blue-900: #060840;
+
+    /* ─── THE BRAND ACCENT — one definition, and the only skin hook ───
+       Riibon blue was spelled TWELVE times across this file: the hex twice,
+       an hsl triplet twice, --primary/--ring/--sidebar-primary/--sidebar-ring
+       in each theme, and twice more as a decimal rgba inside a shadow and a
+       badge background. Changing the brand meant finding all twelve, and
+       missing one failed silently — an opacity utility simply kept rendering
+       the old colour.
+
+       Now: --rb-accent is the definition. Override it (and nothing else) to
+       re-skin. See the [data-brand] block at the end of this file. */
+    --rb-accent: var(--rb-blue-500);
 
     /* Coral scale */
     --rb-coral-50:  #FBEFEC;
@@ -107,7 +120,12 @@
     --rb-yellow-300: #F6DD53;
     --rb-yellow-400: #D9BE35;
     --rb-yellow-500: #AE971F;
-    --rb-yellow-600: #806F13;
+    /* 4.48:1 on yellow-100 at #806F13, one notch under the 4.5 floor. That
+       was invisible while check:theme-contrast read the parallel
+       --rb-yellow-600-hsl triplet, which had drifted to a lighter green
+       (#806A14) and reported a pass. The triplets are gone, so the guard now
+       reads the value that actually renders. */
+    --rb-yellow-600: #7F6E12;
 
     /* Amber scale — the STATUS warning hue, distinct from the brand yellow
        above.
@@ -166,27 +184,6 @@
     --rb-ochre-300: #D9AE56;
     --rb-ochre-500: #9E7A20;
 
-    /* ─── HSL triplets — enable Tailwind opacity modifiers on rb-* classes ─── */
-    --rb-blue-500-hsl: 238 80% 47%;
-    --rb-blue-300-hsl: 236 80% 71%;
-    --rb-coral-400-hsl: 8 51% 59%;
-    --rb-coral-500-hsl: 8 41% 49%;
-    --rb-coral-600-hsl: 8 43% 43%;
-    --rb-amber-300-hsl: 37 84% 61%;
-    --rb-amber-400-hsl: 37 90% 46%;
-    --rb-amber-500-hsl: 37 93% 36%;
-    --rb-amber-600-hsl: 37 93% 28%;
-    --rb-yellow-300-hsl: 51 90% 65%;
-    --rb-yellow-500-hsl: 48 69% 40%;
-    --rb-yellow-600-hsl: 48 73% 29%;
-    --rb-forest-500-hsl: 133 44% 33%;
-    --rb-forest-700-hsl: 133 45% 21%;
-    --rb-terracotta-500-hsl: 10 64% 46%;
-    --rb-terracotta-700-hsl: 10 72% 31%;
-    --rb-plum-500-hsl: 304 28% 34%;
-    --rb-plum-300-hsl: 303 24% 57%;
-    --rb-neutral-500-hsl: 90 4% 40%;
-    --rb-neutral-400-hsl: 87 4% 55%;
 
     /* Semantic tokens */
     --rb-success:        var(--rb-forest-500);
@@ -226,8 +223,15 @@
 
     /* Surface tiers — page/section/inline are literal hexes per handoff
        (no longer scale steps); do NOT rewrite as var(--rb-neutral-*) —
-       that reintroduces drift (WS1 §1.8 / risk R8). */
-    --rb-surface-page:     #FCFCFC;
+       that reintroduces drift (WS1 §1.8 / risk R8).
+
+       page was #FCFCFC until 2026-08-17. A near-white page under a white
+       card means the card has no edge to find, so every surface reached
+       for a shadow or a heavier border to separate itself. The tinted
+       ground is what lets a card be one hairline and nothing else, and
+       it is the same value the published reports have always used
+       (= --rb-cream-100, kept literal here per the note above). */
+    --rb-surface-page:     #F4F9F1;
     --rb-surface-section:  #F5F7F3;
     --rb-surface-card:     var(--rb-neutral-0);
     --rb-surface-elevated: var(--rb-neutral-0);
@@ -274,10 +278,15 @@
        (which doubles as card-description / secondary body text). Sits
        one tier below text-tertiary so the hint reads as a hint instead
        of competing with the user's actual entry. */
-    --rb-text-placeholder: var(--rb-neutral-400);
+    /* Was neutral-400, 3.21:1 on a white card. Placeholder text is still text
+       and owes the 4.5:1 floor. It read as a pass only because the Select
+       trigger used shadcn's --background, which check:theme-contrast cannot
+       resolve; pointing it at bg-rb-surface-card made the real ratio visible.
+       neutral-450 is the tertiary tier and clears the floor at 5.13:1. */
+    --rb-text-placeholder: var(--rb-neutral-450);
 
     /* Canonical focus ring — blue at 20% opacity, AA on canvas */
-    --rb-ring: 0 0 0 3px rgba(24, 31, 217, 0.20);
+    --rb-ring: 0 0 0 3px color-mix(in srgb, var(--rb-accent) 20%, transparent);
 
     /* Elevation — ink-tinted, not pure black. CHANGED: base rgb + tighter alphas. */
     --rb-shadow-xs: 0 1px 0 rgba(30, 33, 27, 0.04);
@@ -367,7 +376,7 @@
     --popover-foreground: 90 10% 12%;
 
     /* Brand blue = primary */
-    --primary: 238 80% 47%;        /* rb-blue-500 */
+    --primary: var(--rb-accent);
     --primary-foreground: 0 0% 100%;
 
     /* Muted + secondary = neutral-50 (warm off-white) with muted text = neutral-500 */
@@ -388,7 +397,7 @@
 
     --border: 84 12% 92%;          /* rb-neutral-100 #EAECE7 */
     --input: 86 9% 84%;            /* rb-neutral-200 #D7DAD3 */
-    --ring: 238 80% 47%;           /* rb-blue-500 */
+    --ring: var(--rb-accent);
 
     --radius: 0.375rem;            /* shadcn default — aligned to rb-radius-md (6px) */
 
@@ -402,6 +411,34 @@
     --rb-radius-2xl:  14px;
     --rb-radius-pill: 999px;
     --rb-radius:      var(--rb-radius-md);
+
+    /* ---------------------------------------------------------------
+       DENSITY — the one decision that sets how the whole app feels.
+       Ratified 2026-08-17 as preset B ("Balanced"), chosen from three
+       rendered candidates; see docs/design-language/PLAN.md. A was the
+       published-report spacing, C was the compact one. B fits 6 table
+       rows on a 1440x900 laptop against A's 4 and C's 8.
+
+       These six values ARE the density. A card, tile or row anywhere in
+       the app reads them; never spell a card radius or a card padding
+       by hand, or the next surface drifts and we are back to the 127
+       hand-rolled card signatures this replaced.
+       --------------------------------------------------------------- */
+    --rb-card-radius: 12px;
+    --rb-card-pad-y:  16px;
+    --rb-card-pad-x:  18px;
+    --rb-card-gap:    11px;
+    --rb-row-pad-y:   11px;
+    --rb-metric-size: 26px;
+
+    /* Bar controls — every dropdown, pill, toggle and button in the Tier 1
+       and Tier 2b control rows. One height, one padding, one radius, so a
+       filter bar reads as one row of one kind of thing. Before this, the
+       controls in a single bar carried 3 paddings, 3 text sizes, 2 radii and
+       two of them had no height at all. */
+    --rb-control-h:      32px;
+    --rb-control-px:     10px;
+    --rb-control-radius: 8px;
 
     /* Riibon spacing scale — non-linear, built around 4px. Don't invent
        between steps. Use as `var(--rb-space-N)` in CSS or via Tailwind
@@ -502,23 +539,31 @@
     --rb-text-caption:    var(--rb-text-xs);   --rb-text-caption-lh:  calc(var(--rb-text-xs) * 1.35);   /* 11.2 */
     --rb-text-code:       var(--rb-text-sm);   --rb-text-code-lh:     calc(var(--rb-text-sm) * 1.55);   /* 12.8 */
 
-    --sidebar-background: 210 8% 95%; /* rb-surface-inline #F2F3F4 — corrected 2026-07-24: WS1's
-       original table + tokens.css both specify neutral-50 #F5F6F3, but the handoff's own
-       01-data-light.png mockup renders the sidebar at a uniform #F2F3F4 (verified by pixel-sampling
-       the PNG directly, sampled at ~15 points, zero variance) — surface-inline, not neutral-50. The
-       written spec and the visual reference disagreed; the visual reference wins (owner-reported). */
+    --sidebar-background: var(--rb-surface-card);
+    /* White, 2026-08-17. It was rb-surface-inline (#F2F3F4), pixel-sampled
+       from the WS1 mockups and previously marked do-not-change. That note is
+       superseded: with the page ground tinted, a grey sidebar sat between the
+       cream canvas and the white cards and matched neither, reading as a third
+       surface nobody chose. The rule now is cream is the BACKGROUND and every
+       surface on top of it is white.
+
+       Superseding note, kept because it explains the value that was here: the
+       WS1 table and tokens.css specified neutral-50 (#F5F6F3), while the
+       handoff's own 01-data-light.png rendered the sidebar at a uniform
+       #F2F3F4, verified by pixel-sampling. The visual reference won. Both are
+       now moot — the sidebar is a surface, and surfaces are white. */
     --sidebar-foreground: 90 10% 12%;
-    --sidebar-primary: 238 80% 47%;
+    --sidebar-primary: var(--rb-accent);
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 84 12% 92%;
     --sidebar-accent-foreground: 90 10% 12%;
     --sidebar-border: 84 12% 92%;
-    --sidebar-ring: 238 80% 47%;
+    --sidebar-ring: var(--rb-accent);
 
     /* Brand mark + the chat user bubble — semantic tokens rather than raw
        palette classes, so future theme work can retarget them in one place. */
     --rb-brand-mark: var(--rb-blue-500);
-    --rb-chat-user-bubble: var(--rb-blue-500);
+    --rb-chat-user-bubble: var(--rb-accent);
     --rb-chat-user-bubble-fg: var(--rb-neutral-0);
 
     --chat-user-bg: 80 14% 96%;    /* rb-neutral-50 #F5F6F3 */
@@ -529,6 +574,24 @@
     /* Native scrollbars/form controls follow the active scheme. */
     color-scheme: light;
   }
+
+  /* ── Bar controls on a touch-sized viewport ─────────────────────────────
+     The one place density is width-dependent, and it is a tap-target rule
+     rather than a taste one: a 32px control is comfortably above WCAG 2.5.8's
+     24px floor with the row's 8px gap, but well under the 44px Apple HIG and
+     WCAG 2.5.5 both call for on touch. 36px with the row's gap clears the
+     spacing exception with room, and costs 4px of a bar nobody scrolls
+     vertically.
+
+     It lives here, in the token, rather than as a `max-sm:h-9` at 20 call
+     sites — which is exactly the drift `--rb-control-h` was introduced to
+     end. Nothing in the components changes. */
+  @media (max-width: 639px) {
+    :root {
+      --rb-control-h: 36px;
+    }
+  }
+
 
   .dark {
     /* Dark = "Terminal Dark" (v1 riibon-themes.jsx → terminalDark): neutral-950
@@ -546,7 +609,7 @@
     --popover: 82 15% 10%;
     --popover-foreground: 97 40% 96%;
 
-    --primary: 236 80% 71%;        /* rb-blue-300 */
+    --primary: var(--rb-accent);
     --primary-foreground: 68 31% 5%;
 
     --secondary: 80 13% 14%;       /* ⚠ rb-surface-elevated #24271E (judgment mapping, D13) */
@@ -566,20 +629,20 @@
 
     --border: 90 6% 20%;           /* rb-border #32352F */
     --input: 90 5% 29%;            /* ⚠ rb-border-strong #494D45 (D13) */
-    --ring: 236 80% 71%;
+    --ring: var(--rb-accent);
 
-    --sidebar-background: 76 19% 12%; /* rb-surface-inline #202318 — corrected 2026-07-24, same
-       mockup-vs-tokens.css disagreement as the light block above: 08-data-dark.png's sidebar
-       samples uniformly to #202318 (verified by pixel-sampling), matching --rb-surface-inline dark
-       exactly (already defined elsewhere, e.g. the --chat-user-bg D13 comment), not surface-section
-       #16180F as WS1's table specified. */
+    /* Dark sidebar follows the same rule: it is a surface, so it takes the
+       card. The value it replaced (#202318, surface-inline dark) was
+       pixel-sampled from 08-data-dark.png, the same mockup-vs-spec
+       disagreement resolved in the light block above. */
+    --sidebar-background: var(--rb-surface-card);
     --sidebar-foreground: 97 40% 96%;
-    --sidebar-primary: 236 80% 71%;
+    --sidebar-primary: var(--rb-accent);
     --sidebar-primary-foreground: 68 31% 5%;
     --sidebar-accent: 90 6% 20%;
     --sidebar-accent-foreground: 97 40% 96%;
     --sidebar-border: 78 14% 14%;   /* ⚠ rb-border-subtle #26291F (D13) */
-    --sidebar-ring: 236 80% 71%;
+    --sidebar-ring: var(--rb-accent);
 
     --rb-brand-mark: var(--rb-yellow-300);
 
@@ -610,13 +673,20 @@
     --rb-text-secondary: var(--rb-neutral-300);
     --rb-text-tertiary:  var(--rb-neutral-400);
     --rb-text-inverse:   var(--rb-neutral-800);
+    /* The accent lifts in dark, exactly as --rb-text-accent below does.
+       Without this line every consumer of --rb-accent (--primary, --ring,
+       --sidebar-primary, --sidebar-ring, the focus ring, the chat bubble)
+       would stay at blue-500 on a dark card — the 1.78:1 case that
+       check-theme-contrast.mjs exists to document. A skin overriding
+       --rb-accent should override it here too. */
+    --rb-accent:         var(--rb-blue-300);
     --rb-text-accent:    var(--rb-blue-300);
     /* Placeholder dark — push one step darker than light mode's neutral-400
        so the hint reads as a hint against the dark canvas instead of
        competing with the user's entry (neutral-200, the shadcn
        muted-foreground default, sat at 80% lightness and looked like
        real text — that's what this token fixes). */
-    --rb-text-placeholder: var(--rb-neutral-500);
+    --rb-text-placeholder: var(--rb-neutral-400);   /* dark: lifted, 4.9:1 on the dark card */
 
     /* Focus ring dark — brighter blue, slightly heavier */
     --rb-ring: 0 0 0 3px rgba(123, 130, 240, 0.32);
@@ -657,6 +727,11 @@
     --rb-source-calendly: var(--rb-blue-200);
     --rb-source-reddit:   var(--rb-terracotta-300);
     --rb-source-bubble:   var(--rb-sage-300);
+    /* Same lift as bubble above. The light-mode comment on this pair already
+       said "sage-500 in light for the 3:1 floor on a white card; sage-300
+       lifted in dark" — the lift reached only one of the two, so TikTok stayed
+       at sage-500 on a dark card. */
+    --rb-source-tiktok:   var(--rb-sage-300);
 
     --rb-success:        var(--rb-forest-300);
     --rb-success-bg:     rgba(47, 122, 63, 0.14);
@@ -674,7 +749,7 @@
     --rb-error-strong:   var(--rb-terracotta-50);
 
     --rb-info:           var(--rb-blue-300);
-    --rb-info-bg:        rgba(24, 31, 217, 0.20);
+    --rb-info-bg:        color-mix(in srgb, var(--rb-accent) 20%, transparent);
     --rb-info-border:    var(--rb-blue-700);
     --rb-info-strong:    var(--rb-blue-100);
 
@@ -702,6 +777,13 @@
 
     /* Primary data-viz tokens can shift lighter for contrast on dark */
     --rb-viz-1: var(--rb-blue-300);
+    /* viz-8 was never overridden, so it stayed blue-300 — the exact value
+       viz-1 lifts to in dark. Series 1 and 8 of an 8-series categorical chart
+       rendered as the same colour, which is precisely the collision the max-8
+       rule exists to bound. This file already fixed the identical shape for
+       viz-2 (forest-500 -> forest-300) and for source-calendly, with a
+       paragraph of comment each, and missed this one. */
+    --rb-viz-8: var(--rb-blue-200);
     /* viz-2 is forest-500 (#2F7A3F) in light — the darkest hue in the
        categorical palette, and the only one that was left unflipped here. On
        the dark chart surface it reads 3.22:1, so every legend label and thin
@@ -733,6 +815,63 @@
      partially undo that work and mirror out to @riibon/ds. */
   [data-app="admin"] {
     --rb-brand-mark: var(--rb-text-secondary);
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     BRAND SKINS — change the accent, and nothing else.
+
+     A skin is one declaration. Everything that used to restate the brand
+     (--primary, --ring, --sidebar-primary, --sidebar-ring, the focus ring's
+     rgba, the offset shadow, every `bg-rb-blue-500/10` opacity utility) now
+     derives from --rb-accent, so overriding it moves all of them together
+     and it is not possible to move some and miss others.
+
+     WHAT A SKIN MAY NOT TOUCH, and why this is a contract rather than an
+     oversight — it is the same contract the published reports have always
+     run on (see the audit-visual-system Theme: "the status palette is never
+     themed", "a client's brand colour is content, not chrome"):
+
+       - The STATUS palette (success / warning / error / info). Green means
+         good in every document Riibon ships. In the predecessor system the
+         semantic "bad" colour literally WAS the prospect's brand red, which
+         meant a second prospect could not reuse a single component.
+       - The NEUTRAL spine and the surfaces. These carry the contrast
+         guarantees that check:theme-contrast verifies across both themes;
+         a per-brand neutral would need its own audit to stay legible.
+       - Typography, radius, spacing. Density is a product decision, not a
+         client's.
+
+     So a skin is subtle by construction, which is the point: the base has to
+     stay solid and the colour change is a change of accent, not of system.
+
+     To add one: give the element `data-brand="<slug>"` (the app shell is the
+     natural place) and add a block here. Nothing else changes.
+
+     HOW TO APPLY ONE, and the CSS rule that decides it: a custom property is
+     SUBSTITUTED where it is declared, not where it is read. `--primary:
+     var(--rb-accent)` on `:root` resolves against :root's accent, and every
+     descendant inherits the already-resolved colour. So overriding
+     `--rb-accent` alone on an inner element moves that element's own uses and
+     nothing that was derived higher up — the swatch changes and the button
+     does not. Verified the hard way while building this.
+
+     Two consequences, both handled below:
+       1. The derived tokens are RE-DERIVED inside the skin block, so a skin
+          works at any level, not only on <html>. This is re-substitution of
+          one source, not a second definition of the colour.
+       2. Prefer setting `data-brand` on the root element anyway. */
+  [data-brand] {
+    --primary:         var(--rb-accent);
+    --ring:            var(--rb-accent);
+    --sidebar-primary: var(--rb-accent);
+    --sidebar-ring:    var(--rb-accent);
+    --rb-text-accent:  var(--rb-accent);
+    --rb-chat-user-bubble: var(--rb-accent);
+    --rb-ring: 0 0 0 3px color-mix(in srgb, var(--rb-accent) 20%, transparent);
+  }
+
+  [data-brand="riibon"] {
+    --rb-accent: var(--rb-blue-500);
   }
 }
 
@@ -1085,7 +1224,7 @@
 
 /* Drop cursor indicator */
 .ProseMirror-dropcursor {
-  border-top: 2px solid hsl(var(--primary));
+  border-top: 2px solid var(--primary);
   display: block;
   pointer-events: none;
 }
@@ -1111,7 +1250,7 @@
 
 /* Selected atom node (data blocks) */
 .ProseMirror .ProseMirror-selectednode {
-  outline: 2px solid hsl(var(--primary));
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
   border-radius: 8px;
 }
