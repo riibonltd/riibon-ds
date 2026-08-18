@@ -22,6 +22,8 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { createRequire } from "module";
+import ts from "typescript";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PKG = path.resolve(__dirname, "..");
@@ -51,15 +53,60 @@ const tokens = fs
 fs.writeFileSync(path.join(PKG, "tokens.css"), tokens);
 
 // 3) tailwind-preset.cjs — the app's tailwind config as a CJS preset
-let preset = fs.readFileSync(APP_TW, "utf8");
+//
+// TYPE STRIPPING IS DONE BY THE TYPESCRIPT COMPILER, NOT BY REGEX.
+//
+// This step used to be a chain of six `.replace()` calls, which is a
+// hand-rolled partial TypeScript compiler: it knew about exactly three TS
+// constructs (`import type`, `satisfies Config`, and the two named imports)
+// and passed everything else through verbatim. That held for as long as the
+// config contained nothing else — and broke the first time it did. On
+// 2026-08-18 the config gained a one-line helper:
+//
+//     const rbVar = (name: string) => `color-mix(…)`;
+//
+// The regexes did not touch it, so the emitted `.cjs` carried a TypeScript
+// annotation and threw `SyntaxError: Unexpected token ':'` on require. Nothing
+// here would have noticed: the sync printed "Synced", the build passed (it
+// compiles `src/`, not the preset), the version bumped, the tag pushed, and
+// the consumer's Tailwind build would have been the first thing to find out.
+//
+// `ts.transpileModule` removes every type construct correctly, by definition.
+// Module form stays ESNext so the export SHAPE is untouched — the two
+// import→require rewrites and `export default` → `module.exports` below are
+// still done here on purpose, because emitting real CommonJS would produce
+// `exports.default = {…}` and change what a consumer's `require` returns.
+let preset = ts.transpileModule(fs.readFileSync(APP_TW, "utf8"), {
+  compilerOptions: {
+    target: ts.ScriptTarget.ES2022,
+    module: ts.ModuleKind.ESNext,
+    removeComments: false,
+  },
+}).outputText;
 preset = preset
-  .replace(/^import type \{ Config \} from "tailwindcss";\n/m, "")
   .replace(/import tailwindcssAnimate from "tailwindcss-animate";/, 'const tailwindcssAnimate = require("tailwindcss-animate");')
   .replace(/import containerQueries from "@tailwindcss\/container-queries";/, 'const containerQueries = require("@tailwindcss/container-queries");')
   .replace(/export default \{/, "module.exports = {")
-  .replace(/\} satisfies Config;/, "};")
   .replace(/^\s*content: \[[^\]]*\],\n/m, ""); // preset must not force consumer content globs
-fs.writeFileSync(path.join(PKG, "tailwind-preset.cjs"), preset);
+
+/* And then it is PARSED, because the whole failure above was a file that was
+   written successfully and could not be loaded. A generated artifact nobody
+   executes is a guess. */
+const presetPath = path.join(PKG, "tailwind-preset.cjs");
+fs.writeFileSync(presetPath, preset);
+try {
+  const loaded = createRequire(import.meta.url)(presetPath);
+  if (!loaded || typeof loaded !== "object" || !loaded.theme) {
+    throw new Error("preset loaded but has no `theme` — the export shape changed.");
+  }
+  if (loaded.content) {
+    throw new Error("preset still carries `content` — it must not force the consumer's globs.");
+  }
+} catch (error) {
+  console.error(`✗ the generated tailwind-preset.cjs does not load:\n  ${error.message}`);
+  console.error("  Nothing downstream can detect this — the consumer's build is the first thing that would.");
+  process.exit(1);
+}
 
 console.log("Synced src/ (from packages/ui), tokens.css, tailwind-preset.cjs");
 console.log("Next: npm run build && bump version && git tag vX.Y.Z && git push --tags && git push");
