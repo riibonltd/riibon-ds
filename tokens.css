@@ -221,17 +221,62 @@
     --rb-highlight-bg:   var(--rb-yellow-50);
     --rb-highlight-border: var(--rb-yellow-100);
 
-    /* Surface tiers — page/section/inline are literal hexes per handoff
-       (no longer scale steps); do NOT rewrite as var(--rb-neutral-*) —
-       that reintroduces drift (WS1 §1.8 / risk R8).
+    /* ─── THE TWO GROUNDS ────────────────────────────────────────────────
+       A surface sits on one of exactly two grounds, and which one is a
+       property OF THE SURFACE, declared once where the surface is mounted.
+       It is never a colour picked at a call site.
 
-       page was #FCFCFC until 2026-08-17. A near-white page under a white
-       card means the card has no edge to find, so every surface reached
-       for a shadow or a heavier border to separate itself. The tinted
-       ground is what lets a card be one hairline and nothing else, and
-       it is the same value the published reports have always used
-       (= --rb-cream-100, kept literal here per the note above). */
-    --rb-surface-page:     #F4F9F1;
+       --rb-ground-document   cream. A page you READ. Analysis, reports, the
+                              Lab. Card-dense by nature, and the tint is what
+                              lets a white card be one hairline and nothing
+                              else — that is the job it does, and the reason
+                              it exists. Meaning follows: cream reads as "a
+                              considered artefact, something I could send a
+                              client", because those are the pages that are.
+       --rb-ground-interface  white. A page you OPERATE. Chat, settings,
+                              onboarding, forms, and the whole marketing
+                              site. Objects here are separated by structure
+                              and by the card's own hairline, not by ground
+                              contrast.
+
+       Why two rather than one, 2026-08-18. Page was #FCFCFC until
+       2026-08-17, when it went cream for the card-edge reason above. That
+       decision was right for the app and was made ABOUT the app — but the
+       token is shared, so it also turned the marketing site cream the moment
+       the design system was released. A marketing page is not card-dense and
+       gains nothing from the tint; it just went a different colour.
+
+       The fix is not to override the token on the site (that is a patch that
+       drifts the first time anyone forgets it). It is to admit there were
+       always two roles hiding inside one token, name them, and make every
+       surface say which it is.
+
+       Nearest precedent: iOS ships `systemBackground` and
+       `systemGroupedBackground`, and the grouped one is tinted for exactly
+       this reason — it sits under grouped white cards. Note the naming is
+       about the LAYOUT, not the topic, which is why this is document /
+       interface and not "report page".
+
+       DARK IS ONE GROUND, DELIBERATELY. The tint solves white-card-on-
+       near-white; in dark the card (#1B1E16) is already LIGHTER than the
+       ground (#101109), so the problem does not exist and there is nothing
+       for a second ground to fix. Both resolve to the same value rather than
+       inventing a distinction nobody can see. If a dark distinction is ever
+       wanted it is one token, not a redesign.
+
+       Surface tiers below are literal hexes per handoff (no longer scale
+       steps); do NOT rewrite as var(--rb-neutral-*) — that reintroduces
+       drift (WS1 §1.8 / risk R8). Cream is --rb-cream-100, kept literal
+       here per that same note. */
+    --rb-ground-document:  #F4F9F1;
+    --rb-ground-interface: var(--rb-neutral-0);
+
+    /* The RESOLVED ground. Every `bg-rb-surface-page` in the product reads
+       this one variable, so a surface declaring itself re-points the whole
+       subtree and no call site changes. Default is document: the app is
+       mostly analysis, and a surface that forgets to declare should land on
+       the ground the majority of the product uses. */
+    --rb-surface-page:     var(--rb-ground-document);
     --rb-surface-section:  #F5F7F3;
     --rb-surface-card:     var(--rb-neutral-0);
     --rb-surface-elevated: var(--rb-neutral-0);
@@ -575,6 +620,28 @@
     color-scheme: light;
   }
 
+  /* ── Declaring a ground ─────────────────────────────────────────────────
+     The ONE mechanism, used identically by the app and by riibon.com: a
+     surface stamps `data-ground` on the element it mounts, and everything
+     inside resolves through it. Nothing picks `bg-rb-ground-*` at a call
+     site — there is no such class, on purpose, because a class at a call
+     site is a decision made 200 times instead of once.
+
+     Both directions are declared, not just the non-default one, so a nested
+     surface can flip BACK. An interface panel inside a document page (a
+     settings drawer over a report) is a real case, and a one-way rule would
+     make it unexpressible.
+
+     In the app the attribute is set by `SidebarShell`, which takes the ground
+     as a required prop so each of its three mounts has to answer. On the
+     marketing site it is set once on <html>. */
+  [data-ground="document"] {
+    --rb-surface-page: var(--rb-ground-document);
+  }
+  [data-ground="interface"] {
+    --rb-surface-page: var(--rb-ground-interface);
+  }
+
   /* ── Bar controls on a touch-sized viewport ─────────────────────────────
      The one place density is width-dependent, and it is a tap-target rule
      rather than a taste one: a 32px control is comfortably above WCAG 2.5.8's
@@ -655,7 +722,13 @@
        per handoff (not scale steps) — card now sits ABOVE section (#1B1E16
        vs #16180F), which was not true before (both resolved to neutral-900).
        Do NOT rewrite as var(--rb-neutral-*) — see WS1 §1.15 / risk R8. */
-    --rb-surface-page:     #101109;
+    /* One ground in dark — see the long note beside --rb-ground-document.
+       The card sits ABOVE the page here, so the tint has no job to do. Both
+       are defined anyway so `[data-ground]` resolves to something real in
+       both themes rather than falling through to the light value. */
+    --rb-ground-document:  #101109;
+    --rb-ground-interface: #101109;
+    --rb-surface-page:     var(--rb-ground-document);
     --rb-surface-section:  #16180F;
     --rb-surface-card:     #1B1E16;
     --rb-surface-elevated: #24271E;
