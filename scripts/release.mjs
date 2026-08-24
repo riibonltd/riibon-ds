@@ -151,32 +151,58 @@ const branch = run("git rev-parse --abbrev-ref HEAD").trim();
 const target = branch === "HEAD" ? "main" : branch;
 
 /**
- * THE COMMIT AND THE TAG GO IN ONE ATOMIC PUSH.
+ * THE TAG IS THE RELEASE. A commit without one publishes nothing.
  *
- * They used to be two, and on 2026-08-24 the remote held release commits for
- * v3.4.0 and v3.5.0 with **no tags for either** — newest tag v3.3.0, two
- * releases behind the code beside it. A tag is not decoration here: external
+ * On 2026-08-24 the remote held release commits for v3.4.0 and v3.5.0 with no
+ * tag for either — newest tag v3.3.0, two releases behind the code beside it,
+ * and a mirror that did not contain the Card component at all. External
  * consumers pin `github:riibonltd/riibon-ds#vX.Y.Z`, and riibon-ai's
- * `check:ds-staleness` compares the monorepo against the LATEST TAG. So a
- * commit that lands without its tag publishes nothing anyone can reach, and
- * the staleness gate then warns on every push about a drift no release can
- * clear. It cried wolf for two releases and was believed the third time only
- * because someone went looking.
+ * `check:ds-staleness` reads the LATEST TAG, so an untagged release is
+ * unreachable AND leaves that gate warning about a drift no release can clear.
+ * It cried wolf twice and was believed the third time only by accident.
  *
- * Two pushes cannot be made safe by ordering — either order leaves a window
- * where one lands and the other does not. `--atomic` makes the server take
- * both refs or neither, so a failure leaves the repo re-runnable rather than
- * half-published.
+ * THE CAUSE IS NOT A RACE, and an earlier version of this comment said it was.
+ * Some environments can push `refs/heads/*` and NOT `refs/tags/*` — a Claude
+ * Code remote session is one: `git push origin main` succeeds and
+ * `git push origin v3.6.0` returns HTTP 403 from the git proxy. That is a
+ * standing permission boundary, not a window between two commands, so
+ * `--atomic` does not help. It makes it worse: a refused tag then blocks the
+ * branch too, and the release lands nowhere instead of half-landing.
+ *
+ * So the branch goes first, deliberately — a release commit that reaches main
+ * is recoverable, and one that does not is work thrown away. Then the tag,
+ * then a check against the REMOTE, because "the command exited 0" is not the
+ * same claim as "a consumer can pin this". If the tag does not land, this
+ * script says so loudly and hands over the one command that finishes the job,
+ * rather than printing a version number nobody can install.
  */
-run(`git push --atomic origin HEAD:${target} v${next}`);
+run(`git push origin HEAD:${target}`);
 
-/* And verify, because "the command exited 0" is not the same claim as "the
-   tag is on the remote" — a push can succeed against a ref the server then
-   rejects by policy, and this script's whole output is a promise that a
-   consumer can pin what it just printed. */
-const onRemote = run(`git ls-remote --tags origin refs/tags/v${next}`).trim();
-if (!onRemote) {
-  console.error(`✗ v${next} is not on the remote after a successful push. Do NOT tell anyone to pin it.`);
+let tagLanded = true;
+let tagError = "";
+try {
+  run(`git push origin v${next}`);
+} catch (err) {
+  tagLanded = false;
+  tagError = String(err?.stderr || err?.message || err).trim();
+}
+
+/* Verified against the remote either way: a push can exit 0 and still leave
+   no ref, and this script's last line is a promise that someone can pin what
+   it names. */
+if (tagLanded && !run(`git ls-remote --tags origin refs/tags/v${next}`).trim()) {
+  tagLanded = false;
+  tagError = "push reported success but the tag is not on the remote";
+}
+
+if (!tagLanded) {
+  console.error(`\n✗ v${next} is committed and pushed to ${target}, but THE TAG DID NOT LAND.`);
+  console.error("  The release is not consumable: nothing can pin an untagged commit, and");
+  console.error("  riibon-ai's check:ds-staleness reads the latest tag, so it will keep warning.\n");
+  console.error(`  ${tagError}\n`);
+  console.error("  If this is a 403, this environment can push branches but not tags. Finish it");
+  console.error("  from a checkout that can, with:\n");
+  console.error(`      git fetch origin && git tag v${next} $(git rev-parse HEAD) && git push origin v${next}\n`);
   process.exit(1);
 }
 
