@@ -125,8 +125,36 @@ run(`git tag v${next}`);
 // CI (where the checkout may be in detached-HEAD state).
 const branch = run("git rev-parse --abbrev-ref HEAD").trim();
 const target = branch === "HEAD" ? "main" : branch;
-run(`git push origin HEAD:${target}`);
-run(`git push origin v${next}`);
+
+/**
+ * THE COMMIT AND THE TAG GO IN ONE ATOMIC PUSH.
+ *
+ * They used to be two, and on 2026-08-24 the remote held release commits for
+ * v3.4.0 and v3.5.0 with **no tags for either** — newest tag v3.3.0, two
+ * releases behind the code beside it. A tag is not decoration here: external
+ * consumers pin `github:riibonltd/riibon-ds#vX.Y.Z`, and riibon-ai's
+ * `check:ds-staleness` compares the monorepo against the LATEST TAG. So a
+ * commit that lands without its tag publishes nothing anyone can reach, and
+ * the staleness gate then warns on every push about a drift no release can
+ * clear. It cried wolf for two releases and was believed the third time only
+ * because someone went looking.
+ *
+ * Two pushes cannot be made safe by ordering — either order leaves a window
+ * where one lands and the other does not. `--atomic` makes the server take
+ * both refs or neither, so a failure leaves the repo re-runnable rather than
+ * half-published.
+ */
+run(`git push --atomic origin HEAD:${target} v${next}`);
+
+/* And verify, because "the command exited 0" is not the same claim as "the
+   tag is on the remote" — a push can succeed against a ref the server then
+   rejects by policy, and this script's whole output is a promise that a
+   consumer can pin what it just printed. */
+const onRemote = run(`git ls-remote --tags origin refs/tags/v${next}`).trim();
+if (!onRemote) {
+  console.error(`✗ v${next} is not on the remote after a successful push. Do NOT tell anyone to pin it.`);
+  process.exit(1);
+}
 
 console.log(`\n✓ Published @riibon/ds v${next}`);
 console.log(`  Bump the consumer pin: "@riibon/ds": "github:riibonltd/riibon-ds#v${next}"`);
