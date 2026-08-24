@@ -115,6 +115,30 @@ const [maj, min, pat] = pkg.version.split(".").map(Number);
 const next = bump === "major" ? `${maj + 1}.0.0` : bump === "minor" ? `${maj}.${min + 1}.0` : `${maj}.${min}.${pat + 1}`;
 pkg.version = next;
 fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
+
+/**
+ * The lockfile stamps the version TWICE and this script used to bump neither.
+ *
+ * `package-lock.json` still read `1.0.0` at v3.5.0 — it had been wrong since
+ * the first release, and stayed invisible because nothing here reads it and
+ * nobody had run `npm install` in this repo in between. The first person who
+ * did got a dirty tree from a command that installs nothing, and this script's
+ * clean-tree guard then refused to release. A stale stamp that only surfaces
+ * as an unrelated failure, on a machine that has never built the package
+ * before, is the worst kind: it fires for the person with the least context.
+ *
+ * It does not affect resolution — the fields are informational — so this is
+ * not a correctness fix. It is the two-places-one-fact rule: the version lives
+ * in package.json, and everything else derives.
+ */
+const lockPath = path.join(PKG, "package-lock.json");
+if (fs.existsSync(lockPath)) {
+  const lock = JSON.parse(fs.readFileSync(lockPath, "utf8"));
+  lock.version = next;
+  if (lock.packages?.[""]) lock.packages[""].version = next;
+  fs.writeFileSync(lockPath, JSON.stringify(lock, null, 2) + "\n");
+}
+
 console.log(`• version → ${next}`);
 
 // --- 5) commit, tag, push ---
