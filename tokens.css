@@ -303,8 +303,9 @@
 
        `text-inverse` means "text on the surface that is the INVERSE of the
        canvas", so it flips with the scheme: white in light, ink in dark. That
-       is correct for a surface which also flips (the chart tooltip, whose
-       `--rb-tooltip-fg` resolves to exactly these two values).
+       is correct only for a surface which also flips against the canvas.
+       (The chart tooltip used to be the example here; since 2026-08-21 it
+       matches the scheme instead — `--rb-tooltip-fg` is text-primary now.)
 
        `--rb-surface-ink` does NOT flip. It is dark in both themes — #1E211B in
        light, #0D0E09 in dark — because it also backs progress-bar fills and the
@@ -379,8 +380,14 @@
     /* Chart chrome — Recharts theming (grid/axis/tooltip). NEW per handoff v0.8. */
     --rb-grid: #EAECE7;
     --rb-axis: #8D9188;
-    --rb-tooltip-bg: #1E211B;
-    --rb-tooltip-fg: #FFFFFF;
+    /* Chart tooltip — matches the scheme (card surface + primary ink), it
+       does NOT invert. It used to (#1E211B/#FFF here, flipped in .dark),
+       which put a black box on the light canvas and a white box on the dark
+       one, and made every canvas-tuned series colour inside it illegible.
+       Changed 2026-08-21 on Melvin's request: the box follows the theme and
+       stands off the canvas by border + shadow instead of by inversion. */
+    --rb-tooltip-bg: var(--rb-surface-card);
+    --rb-tooltip-fg: var(--rb-text-primary);
 
     /* Per-source identity colours (conversion-source lines, chips, connector
        accents — TrackedConversionsChart & friends). Sources need STABLE
@@ -409,6 +416,14 @@
        TikTok query backend ever ships, give Bubble its own hue first. sage-500
        in light for the 3:1 floor on a white card; sage-300 lifted in dark. */
     --rb-source-bubble:   var(--rb-sage-500);
+    /* Data feed takes the plum family's lighter step, the same way calendly
+       (blue-300) sits under meta (blue-500). Unlike bubble/tiktok above this
+       CANNOT share a hue: a data feed has a real query backend and a brand can
+       hold one alongside Stripe, so both may render on one chart. Every base
+       hue in the brand scale is already a source identity, so a second step of
+       an existing family is the honest option — pick a genuinely new hue here
+       before adding any further source. */
+    --rb-source-datafeed: var(--rb-plum-300);
 
     /* ─── shadcn HSL tokens, mapped to Riibon palette ─── */
     /* Page + card: surface-page canvas (literal, not a scale step), pure white cards */
@@ -659,6 +674,49 @@
     }
   }
 
+  /* ── Density on a phone ─────────────────────────────────────────────────
+     Preset B was chosen from three candidates rendered on a 1440x900 laptop
+     (docs/design-language/PLAN.md). Nobody rendered it at 390px, and the
+     six values above were applied there unchanged — which is how a KPI tile
+     came to spend 36px of a 358px reading width on its own side padding and
+     still print a 26px figure, so three tiles could not sit in a row and the
+     app laid them out 2 + 1 with a hole.
+
+     These are the SAME six decisions at a phone's scale, not a second design:
+     the ratios between them hold, and every surface that reads the tokens
+     moves together. Nothing here is a breakpoint at a call site.
+
+     Chosen against a 390px viewport (iPhone 14/15/16 CSS width), which is the
+     narrowest device we have to hold: 16px frame gutter + 3 x tile + 2 x gap
+     leaves 108px a tile, and a 22px figure of five digits is 62px of that. */
+  @media (max-width: 639px) {
+    :root {
+      --rb-card-pad-y:  12px;
+      --rb-card-pad-x:  14px;
+      --rb-card-gap:     8px;
+      --rb-row-pad-y:    9px;
+      --rb-metric-size: 22px;
+    }
+  }
+
+  /* ── Touch, at any width ────────────────────────────────────────────────
+     The 36px above is a VIEWPORT rule and it is the right shape for a narrow
+     desktop window. It is the wrong shape for a finger, and the note it
+     replaced reasoned its way to 36 through WCAG 2.5.5's spacing exception —
+     which grants an undersized target clearance, not parity. Apple's HIG has
+     no exception: 44pt is the floor a native control is held to, and the Lab
+     is going into an iOS shell.
+
+     Keyed on `pointer: coarse` rather than on width so it also reaches the
+     surface that width cannot see — an 834px iPad, where every control in the
+     bar is currently a 32px target under a fingertip. It is deliberately
+     AFTER the width rule so a coarse pointer wins at any width. */
+  @media (pointer: coarse) {
+    :root {
+      --rb-control-h: 44px;
+    }
+  }
+
 
   .dark {
     /* Dark = "Terminal Dark" (v1 riibon-themes.jsx → terminalDark): neutral-950
@@ -781,8 +839,11 @@
     /* Chart chrome dark — NEW per handoff v0.8. */
     --rb-grid: #26291F;
     --rb-axis: #666A62;
-    --rb-tooltip-bg: #F4F9F1;
-    --rb-tooltip-fg: #1E211B;
+    /* Chart tooltip — same var refs as light on purpose: the pair rides
+       surface-card/text-primary, which this block already re-points, so the
+       tooltip follows the scheme instead of inverting against it. */
+    --rb-tooltip-bg: var(--rb-surface-card);
+    --rb-tooltip-fg: var(--rb-text-primary);
 
     /* Source identity colours — lift the low-luminance ones for the dark
        canvas; calendly moves to blue-200 so it stays separable from meta
@@ -805,6 +866,8 @@
        lifted in dark" — the lift reached only one of the two, so TikTok stayed
        at sage-500 on a dark card. */
     --rb-source-tiktok:   var(--rb-sage-300);
+    /* Stripe takes plum-300 in dark, so the data feed lifts a step further. */
+    --rb-source-datafeed: var(--rb-plum-100);
 
     --rb-success:        var(--rb-forest-300);
     --rb-success-bg:     rgba(47, 122, 63, 0.14);
@@ -1041,9 +1104,17 @@
 .rb-caption  { font-family: var(--font-sans); font-size: var(--rb-text-xs);  line-height: var(--rb-leading-snug); color: var(--rb-text-secondary); }
 .rb-overline { font-family: var(--font-mono); font-size: var(--rb-text-2xs); line-height: 1; letter-spacing: var(--rb-track-caps); text-transform: uppercase; color: var(--rb-text-secondary); font-weight: 600; }
 
+/* THE NUMERIC SCALE — one rung per heading size, so a figure never has to
+   borrow a heading token to get a size.
+     display 38px = h1 · large 30px = h2 · medium 24px = h3 · small 20px = h4
+   The 24px rung was missing until 2026-08-24, and h3 is the size most metric
+   values want. Eight of them reached for `text-rb-h3` because it was the only
+   thing at that size — which is how a heading face ended up on a number that
+   is not a heading, in a product whose screens are mostly numbers. */
 .rb-num-display { font-family: var(--font-mono); font-weight: 600; font-size: var(--rb-text-4xl); line-height: var(--rb-leading-flat); letter-spacing: var(--rb-track-display); font-variant-numeric: tabular-nums; }
 .rb-num-large   { font-family: var(--font-mono); font-weight: 600; font-size: var(--rb-text-3xl); line-height: var(--rb-leading-flat); letter-spacing: var(--rb-track-tight); font-variant-numeric: tabular-nums; }
-.rb-num-medium  { font-family: var(--font-mono); font-weight: 600; font-size: var(--rb-text-xl);  line-height: var(--rb-leading-flat); font-variant-numeric: tabular-nums; }
+.rb-num-medium  { font-family: var(--font-mono); font-weight: 600; font-size: var(--rb-text-2xl); line-height: var(--rb-leading-flat); letter-spacing: var(--rb-track-tight); font-variant-numeric: tabular-nums; }
+.rb-num-small   { font-family: var(--font-mono); font-weight: 600; font-size: var(--rb-text-xl);  line-height: var(--rb-leading-flat); font-variant-numeric: tabular-nums; }
 /* Base numeral utility (D11) — every metric/table figure/axis tick uses
    mono tabular numerals; no Bricolage numeral exception. */
 .rb-num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: var(--rb-track-mono); }
@@ -1061,6 +1132,29 @@
   font-family: var(--font-display);
   letter-spacing: var(--rb-track-display);
 }
+/* ── Safe areas ────────────────────────────────────────────────────────────
+   `viewport-fit=cover` in index.html hands the layout viewport the WHOLE
+   screen, including the strip behind the status bar and the strip the home
+   indicator sits in. That is what makes a top bar's own ground run to the top
+   of the glass instead of leaving a letterboxed band above it — and it is also
+   what puts the last row of a page underneath the home indicator if nothing
+   claims the space back.
+
+   These three claim it back, at the three elements that actually touch an
+   edge, so the rule lives once rather than at every fixed or full-height
+   element. `env(..., 0px)` resolves to zero everywhere there is no inset — a
+   desktop browser, an older phone, any Android — so this is inert until it is
+   not, and it is not a mobile-only stylesheet.
+
+   NOT YET VERIFIED ON A DEVICE. Chromium reports no insets, so what is proven
+   here is the zero case: nothing moves on a desktop or in the test suite. */
+.rb-safe-t { padding-top: env(safe-area-inset-top, 0px); }
+.rb-safe-b { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.rb-safe-x {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
 .rb-scroll {
   scrollbar-width: thin;
   /* Thumb derives from the scheme's primary text colour so it flips with
@@ -1072,6 +1166,23 @@
      this region's own scroll is exhausted. */
   overscroll-behavior: contain;
 }
+/* A persistent scrollbar is a POINTER affordance: it says "there is more this
+   way" to someone who has to aim at it to get there. A finger does not aim at
+   it — it drags the content — and the platform already draws a transient
+   indicator during that drag. So on touch the styled track is 8px of permanent
+   chrome under every horizontally-scrolling row in the app (the view tabs, the
+   filter bar, every wide table), drawn in a colour derived from the primary
+   text so it reads as a rule rather than as furniture. It is the grey bar
+   under the tab row, and it is the single most un-native thing on the screen.
+
+   `scrollbar-width: none` covers Firefox and the standard property; the
+   `::-webkit-scrollbar { display: none }` below covers WebKit, which is the
+   engine an iOS shell will use whatever wraps it. */
+@media (pointer: coarse) {
+  .rb-scroll { scrollbar-width: none; }
+  .rb-scroll::-webkit-scrollbar { display: none; }
+}
+
 .rb-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
 .rb-scroll::-webkit-scrollbar-thumb {
   background: color-mix(in srgb, var(--rb-text-primary) 18%, transparent);
