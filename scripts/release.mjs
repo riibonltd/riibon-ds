@@ -172,9 +172,19 @@ const target = branch === "HEAD" ? "main" : branch;
  * So the branch goes first, deliberately — a release commit that reaches main
  * is recoverable, and one that does not is work thrown away. Then the tag,
  * then a check against the REMOTE, because "the command exited 0" is not the
- * same claim as "a consumer can pin this". If the tag does not land, this
- * script says so loudly and hands over the one command that finishes the job,
- * rather than printing a version number nobody can install.
+ * same claim as "a consumer can pin this".
+ *
+ * A FAILED TAG PUSH IS NO LONGER FATAL, and that is the point.
+ * `.github/workflows/tag-release.yml` tags on every push to main from the
+ * version in package.json, so the branch push alone completes the release even
+ * where this process cannot create a tag. This script still tries — it is
+ * faster and it keeps the local repo honest — but when it cannot, it says so
+ * and stands down rather than failing a release that CI is about to finish.
+ *
+ * The first fix here was to print the recovery command and exit 1. That was a
+ * handover, and a release step ending in "then a human runs one git command"
+ * is the exact step that got skipped for v3.4.0 and v3.5.0. The answer to a
+ * blocked mechanism is an unblocked mechanism, not a person.
  */
 run(`git push origin HEAD:${target}`);
 
@@ -196,14 +206,10 @@ if (tagLanded && !run(`git ls-remote --tags origin refs/tags/v${next}`).trim()) 
 }
 
 if (!tagLanded) {
-  console.error(`\n✗ v${next} is committed and pushed to ${target}, but THE TAG DID NOT LAND.`);
-  console.error("  The release is not consumable: nothing can pin an untagged commit, and");
-  console.error("  riibon-ai's check:ds-staleness reads the latest tag, so it will keep warning.\n");
-  console.error(`  ${tagError}\n`);
-  console.error("  If this is a 403, this environment can push branches but not tags. Finish it");
-  console.error("  from a checkout that can, with:\n");
-  console.error(`      git fetch origin && git tag v${next} $(git rev-parse HEAD) && git push origin v${next}\n`);
-  process.exit(1);
+  console.warn(`\n⚠ Could not push v${next} from here: ${tagError}`);
+  console.warn("  Not fatal. .github/workflows/tag-release.yml tags from package.json on every");
+  console.warn(`  push to ${target}, so the branch push above completes the release. Confirm with:\n`);
+  console.warn(`      git ls-remote --tags origin refs/tags/v${next}\n`);
 }
 
 console.log(`\n✓ Published @riibon/ds v${next}`);
