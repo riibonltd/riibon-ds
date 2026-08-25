@@ -1,0 +1,96 @@
+# TAG WHATEVER package.json SAYS. Nothing else about a release is manual, and
+# this was the one step that could not be done from everywhere.
+#
+# ---------------------------------------------------------------------------
+# WHY THIS EXISTS.
+#
+# On 2026-08-24 this repo held release commits for v3.4.0 and v3.5.0 with no
+# tag for either — newest tag v3.3.0, two releases behind the code beside it,
+# and a mirror that did not contain the Card component at all. A tag is not
+# decoration here: consumers pin `github:riibonltd/riibon-ds#vX.Y.Z`, and
+# riibon-ai's `check:ds-staleness` reads the LATEST TAG. An untagged release is
+# unreachable AND leaves that gate warning about a drift no release can clear,
+# which trains everyone to ignore it. It cried wolf twice.
+#
+# The cause is environmental, not a race. Some environments can push
+# `refs/heads/*` and NOT `refs/tags/*` — a Claude Code remote session is one:
+# `git push origin main` succeeds and `git push origin v3.6.0` gets HTTP 403
+# from its git proxy, with none of GitHub's own response headers on the reply.
+# So `release.mjs` lands the commit and then cannot finish the job, and asking
+# a person to run one git command as a follow-up is exactly the kind of manual
+# step that gets skipped twice and noticed on the third release.
+#
+# GitHub Actions has no such restriction, and `contents: write` on the built-in
+# GITHUB_TOKEN is enough — this needs no secret, unlike publish-ds.yml, which
+# holds a PAT only so it can clone the PRIVATE monorepo. Tagging a commit that
+# is already on this repo's main needs nothing from anywhere else.
+#
+# ---------------------------------------------------------------------------
+# WHAT IT DOES: on any push to main, read the version in package.json. If a tag
+# for it already exists, do nothing. Otherwise tag the commit that INTRODUCED
+# that version — not HEAD, which may have moved on — and push it.
+#
+# Idempotent by construction, so it is safe to re-run and safe when a push
+# touches no version at all.
+
+name: Tag release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write # create refs/tags/* with the built-in token
+
+concurrency:
+  group: tag-release
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0 # need full history to find the commit that set the version
+
+      - name: Tag the version in package.json, if it is not tagged
+        run: |
+          set -euo pipefail
+
+          VERSION="$(node -p "require('./package.json').version")"
+          TAG="v${VERSION}"
+          echo "package.json declares ${VERSION}"
+
+          if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+            echo "${TAG} already exists — nothing to do."
+            exit 0
+          fi
+
+          # The commit that FIRST declared this version, not HEAD. A release
+          # commit is often followed by unrelated work (a script fix, a doc
+          # change), and the tag should mark the release, not whatever landed
+          # after it.
+          TARGET="$(git log --format=%H -S"\"version\": \"${VERSION}\"" -- package.json | tail -1)"
+          if [ -z "${TARGET}" ]; then
+            echo "::error::Could not find the commit that set version ${VERSION} in package.json."
+            exit 1
+          fi
+          echo "tagging ${TAG} at ${TARGET}"
+          echo "  $(git log --format='%s' -1 "${TARGET}")"
+
+          git config user.name "riibon-ds-bot"
+          git config user.email "bot@riibon.com"
+          git tag -a "${TAG}" "${TARGET}" -m "Release ${TAG}"
+          git push origin "${TAG}"
+
+          # Verify against the REMOTE. "The push exited 0" is not the same
+          # claim as "a consumer can pin this", and this whole workflow exists
+          # because that difference went unnoticed for two releases.
+          if [ -z "$(git ls-remote --tags origin "refs/tags/${TAG}")" ]; then
+            echo "::error::${TAG} is not on the remote after a successful push."
+            exit 1
+          fi
+          echo "✓ ${TAG} is on the remote."
